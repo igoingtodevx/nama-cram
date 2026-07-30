@@ -439,12 +439,12 @@ async function sendChat() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({
-        model: 'gpt-5.4-mini',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: msg }
         ],
-        max_tokens: 300,
+        max_completion_tokens: 300,
         temperature: 0.3
       })
     });
