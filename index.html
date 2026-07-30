@@ -183,6 +183,53 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   .card .answer { font-size:0.8rem; }
   .btn { padding:14px 6px; font-size:0.75rem; }
 }
+
+/* ── Stats Dashboard ── */
+.stats-toggle {{
+  position:fixed; bottom:80px; right:16px; z-index:100;
+  width:48px; height:48px; border-radius:50%;
+  background: var(--card); color:var(--text); border:1px solid var(--border);
+  font-size:1.2rem; cursor:pointer;
+  transition: transform 0.2s;
+}}
+.stats-toggle:active {{ transform:scale(0.9); }}
+
+.stats-overlay {{
+  position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.7);
+  display:none; align-items:center; justify-content:center;
+}}
+.stats-overlay.open {{ display:flex; }}
+
+.stats-panel {{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:20px; width:min(400px,90vw);
+  max-height:80vh; overflow-y:auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}}
+
+.stat-row {{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid var(--border);
+  font-size:0.8rem;
+}}
+.stat-row:last-child {{ border-bottom:none; }}
+
+.stat-bar {{
+  height:6px; border-radius:3px; background:var(--border);
+  margin:4px 0 10px; overflow:hidden;
+}}
+.stat-bar-fill {{
+  height:100%; border-radius:3px; transition:width 0.3s;
+}}
+.stat-bar-fill.green {{ background:var(--green); }}
+.stat-bar-fill.orange {{ background:var(--orange); }}
+.stat-bar-fill.red {{ background:var(--red); }}
+.stat-bar-fill.accent {{ background:var(--accent); }}
+
+@media (max-width:480px) {{
+  .stats-toggle {{ bottom:76px; }}
+}}
+
 </style>
 </head>
 <body>
@@ -225,6 +272,9 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 </div>
 
 <!-- Chat Widget -->
+
+<button class="stats-toggle" onclick="toggleStats()" title="Fortschritt">📊</button>
+
 <button class="chat-toggle" onclick="toggleChat()" title="NAMA Assistant">💬</button>
 
 <div class="chat-panel" id="chatPanel">
@@ -413,9 +463,133 @@ async function sendChat() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+
+// ── Stats Dashboard ──
+function toggleStats() {
+  const overlay = document.getElementById('statsOverlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open')) renderStats();
+}
+
+function renderStats() {
+  const allDone = ALL_CARDS.length - cards.length;
+  const totalPct = Math.round(allDone / ALL_CARDS.length * 100);
+  
+  // Overall
+  let html = `<div style="text-align:center;margin-bottom:16px">
+    <div style="font-size:2.5rem;font-weight:700;color:var(--accent)">${allDone}</div>
+    <div style="font-size:0.75rem;color:var(--muted)">von ${ALL_CARDS.length} Karten gemeistert</div>
+    <div class="stat-bar" style="margin-top:8px"><div class="stat-bar-fill accent" style="width:${totalPct}%"></div></div>
+  </div>`;
+  
+  // By category
+  const cats = [...new Set(ALL_CARDS.map(c => c.category))];
+  for (const cat of cats) {
+    const catCards = ALL_CARDS.filter(c => c.category === cat);
+    const masteredInCat = catCards.filter(c => mastered.includes(c.id)).length;
+    const failedInCat = catCards.filter(c => failed.includes(c.id)).length;
+    const totalInCat = catCards.length;
+    const pct = Math.round(masteredInCat / totalInCat * 100);
+    const color = pct >= 80 ? 'green' : pct >= 40 ? 'orange' : 'red';
+    
+    html += `<div class="stat-row">
+      <span>${cat}</span>
+      <span style="font-weight:600;font-size:0.75rem">${masteredInCat}/${totalInCat}</span>
+    </div>
+    <div class="stat-bar"><div class="stat-bar-fill ${color}" style="width:${pct}%"></div></div>`;
+  }
+  
+  // Remaining
+  html += `<div style="margin-top:12px;font-size:0.75rem;color:var(--muted)">
+    ✅ ${mastered.length} sicher &nbsp;|&nbsp; ❌ ${failed.length} schwach &nbsp;|&nbsp; 📝 ${cards.length} offen
+  </div>`;
+  
+  document.getElementById('statsContent').innerHTML = html;
+}
+
+// ── Cross-Device Sync ──
+function exportProgress() {
+  const data = {
+    mastered, failed,
+    timestamp: new Date().toISOString(),
+    total: ALL_CARDS.length
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'nama-progress-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importProgress(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.mastered && data.failed) {
+        mastered = data.mastered;
+        failed = data.failed;
+        localStorage.setItem('nama-mastered', JSON.stringify(mastered));
+        localStorage.setItem('nama-failed', JSON.stringify(failed));
+        cards = filterCards();
+        currentIndex = 0;
+        showCard();
+        renderStats();
+        alert('✅ Fortschritt importiert: ' + mastered.length + ' sicher, ' + failed.length + ' schwach');
+      } else {
+        alert('❌ Ungültige Datei');
+      }
+    } catch(err) {
+      alert('❌ Fehler: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function resetProgress() {
+  if (confirm('Gesamten Fortschritt löschen? Das kann nicht rückgängig gemacht werden.')) {
+    mastered = [];
+    failed = [];
+    localStorage.removeItem('nama-mastered');
+    localStorage.removeItem('nama-failed');
+    cards = filterCards();
+    currentIndex = 0;
+    showCard();
+    renderStats();
+  }
+}
+
+
 // ── Init ──
 cards = filterCards();
 showCard();
 </script>
+
+<!-- Stats Dashboard -->
+<div class="stats-overlay" id="statsOverlay" onclick="if(event.target===this)toggleStats()">
+  <div class="stats-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h2 style="font-size:1.1rem">📊 Fortschritt</h2>
+      <button onclick="toggleStats()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <div id="statsContent"></div>
+    <hr style="border-color:var(--border);margin:14px 0">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="exportProgress()" style="flex:1;border-color:var(--blue);color:var(--blue)">📤 Export</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()" style="flex:1;border-color:var(--green);color:var(--green)">📥 Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importProgress(event)">
+      <button class="btn" onclick="resetProgress()" style="flex:1;border-color:var(--red);color:var(--red);font-size:0.7rem">↺ Reset</button>
+    </div>
+    <div style="margin-top:10px;font-size:0.65rem;color:var(--muted);text-align:center">
+      Export = Fortschritt speichern. Auf anderem Gerät importieren = sync.
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
