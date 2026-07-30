@@ -1,0 +1,3 @@
+# Original PDFs and OCR caches are versioned for reproducible index rebuilds, but never deployed as public Vercel files.
+knowledge/source-pdfs/
+knowledge/ocr-cache/

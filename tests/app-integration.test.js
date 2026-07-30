@@ -134,7 +134,7 @@ test('chat gives every dynamic assistant reply a pin button and sends the select
   const calls = [];
   context.fetch = async (url, options) => {
     calls.push({ url, options });
-    return { ok: true, status: 200, json: async () => ({ reply: '- **DNSH**: Kein erheblicher Schaden.' }) };
+    return { ok: true, status: 200, json: async () => ({ reply: '- **DNSH**: Kein erheblicher Schaden.', sources: ['Klausuren/SS25_PT1, S. 2'] }) };
   };
   getElementById('chatProvider').value = 'nvidia';
   context.saveChatProvider();
@@ -149,4 +149,6 @@ test('chat gives every dynamic assistant reply a pin button and sends the select
   const assistantReply = getElementById('chatMessages').children.at(-1);
   assert.match(assistantReply.innerHTML, /class="pin-btn"/);
   assert.match(assistantReply.innerHTML, /<ul>/);
+  assert.match(assistantReply.innerHTML, /chat-sources/);
+  assert.match(assistantReply.innerHTML, /Klausuren\/SS25_PT1, S\. 2/);
 });

@@ -170,6 +170,8 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .chat-msg ul { margin:0; padding-left:18px; }
 .chat-msg li + li { margin-top:6px; }
 .chat-msg strong { color:#f1efff; font-weight:700; }
+.chat-sources { margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,.12); color:var(--muted); font-size:.68rem; line-height:1.35; }
+.chat-sources strong { color:var(--muted); }
 
 .chat-input-row {
   display:flex; border-top:1px solid var(--border); padding:8px;
@@ -594,9 +596,13 @@ function formatTutorReply(reply) {
   return html.join('');
 }
 
-function assistantMessageHtml(id, reply, loading = false) {
+function assistantMessageHtml(id, reply, loading = false, sources = []) {
   const content = loading ? '...' : formatTutorReply(reply);
-  return `<button class="pin-btn" onclick="togglePin('${id}', this)" title="Anpinnen">📌</button>${content}`;
+  const safeSources = Array.isArray(sources) ? sources.filter(source => typeof source === 'string' && source.trim()) : [];
+  const sourceHtml = safeSources.length
+    ? `<div class="chat-sources"><strong>Quellen:</strong> ${safeSources.map(escapeHtml).join(' · ')}</div>`
+    : '';
+  return `<button class="pin-btn" onclick="togglePin('${id}', this)" title="Anpinnen">📌</button>${content}${sourceHtml}`;
 }
 
 function appendChatMessage(role, content, { loading = false } = {}) {
@@ -668,7 +674,7 @@ async function sendChat() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Serverfehler (${res.status})`);
-    replyEl.innerHTML = assistantMessageHtml(replyEl.id, data.reply);
+    replyEl.innerHTML = assistantMessageHtml(replyEl.id, data.reply, false, data.sources);
     replyEl.classList.remove('loading');
   } catch(e) {
     replyEl.innerHTML = assistantMessageHtml(replyEl.id, `**Fehler**: ${e.message}`);
