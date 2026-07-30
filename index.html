@@ -290,6 +290,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   <button class="pill" data-cat="🟠 Theorie">🟠 Theorie</button>
   <button class="pill" data-cat="🟠 Kleine Rechenaufgaben">🟠 Calc</button>
 </div>
+  <div class="scroll-hint" id="scrollHint" style="display:none;padding:0 14px 6px;max-width:600px;margin:0 auto;font-size:0.65rem;color:var(--muted);text-align:center">← Swipe für mehr Kategorien →</div>
 
 <div class="card-container" id="cardContainer">
   <div class="card" id="card" onclick="flipCard()">
@@ -362,7 +363,9 @@ function shuffleByPriority(arr) {
 
 function filterCards() {
   if (activeFilter === 'all') return shuffleByPriority([...ALL_CARDS]);
-  return shuffleByPriority(ALL_CARDS.filter(c => c.category === activeFilter));
+  const filtered = ALL_CARDS.filter(c => c.category === activeFilter);
+  document.getElementById("scrollHint").style.display = activeFilter === "all" ? "none" : "block";
+  return shuffleByPriority(filtered);
 }
 
 // ── Render ──
