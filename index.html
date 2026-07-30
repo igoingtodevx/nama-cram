@@ -316,7 +316,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
     <input type="password" id="apiKeyInput" placeholder="sk-..." onchange="saveApiKey()">
   </div>
   
-  <div class="pinned-section" id="pinnedSection" style="display:none">
+  <div class="pinned-section" id="pinnedSection">
     <div class="pinned-header" onclick="document.getElementById('pinnedList').classList.toggle('open')">
       📌 Angepinnte Notizen (<span id="pinnedCount">0</span>)
     </div>
@@ -324,7 +324,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   </div>
 
   <div class="chat-messages" id="chatMessages">
-    <div class="chat-msg assistant">👋 Frag mich was zur NAMA-Klausur — Abkürzungen, Konzepte, Rechenwege.</div>
+    <div class="chat-msg assistant" id="greetingMsg"><button class="pin-btn" onclick="togglePin('greetingMsg', this)" title="Anpinnen">📌</button>👋 Frag mich was zur NAMA-Klausur — Abkürzungen, Konzepte, Rechenwege.</div>
   </div>
   <div class="chat-input-row">
     <input type="text" id="chatInput" placeholder="z.B. Was bedeutet DNSH?" onkeydown="if(event.key==='Enter')sendChat()">
@@ -461,13 +461,24 @@ Wichtige Joker-Zahlen fürs Essay: BASF (34 Interviews, >240 IROs), DB (Scope 1 
 
 Essay-Taktik: ROADS als Checkliste + 6-Absatz-Struktur (Einstieg, Begriffe, Reg-Kette, 3 Ebenen, Chancen/Risiken, Fazit) + Satz-Punkte-Denken (jeder Satz = 1 Fachinfo, keine Schachtelsätze). NICHT blind die 25-Satz-Vorlage abschreiben — sie passt nicht zum Artikelthema.
 
-ANTWORTFORMAT:
-- Formatierung: Nutze **fett** für Kernbegriffe, nummerierte Listen (1. 2. 3.) für Aufzählungen.
-- Abkürzungen: Immer fett + Definition in EINEM Satz. Kein Doppelpunkt-Geschwafel.
-- Liste: Jeder Eintrag neue Zeile mit Bindestrich.
-- Maximal 1 Leerzeile zwischen Absätzen.
-- Kein Smalltalk, kein "Gerne helfe ich dir", kein Einleitungssatz. Direkt antworten.
-- Deutsch.`;
+ANTWORTFORMAT (STRENG BEFOLGEN!):
+1. KEIN Einleitungssatz (kein "Hier sind...", kein "Gerne..."). Direkt Antwort.
+2. Listen IMMER mit Bindestrich pro Zeile.
+3. Kernbegriffe **fett**.
+4. Definitionen = EIN Satz nach dem Begriff, kein Absatz.
+5. Max 1 Leerzeile zwischen Blöcken.
+6. Deutsch. Kurz. Präzise.
+
+BEISPIEL GUT:
+- **CSRD** — EU-Richtlinie zur NH-Berichterstattung nach ESRS.
+- **ESRS** — Konkretisieren was und wie berichtet wird, doppelte Wesentlichkeit.
+
+BEISPIEL SCHLECHT:
+Hier sind die wichtigsten Abkürzungen für die NAMA-Klausur:
+
+CSRD: Die Corporate Sustainability Reporting Directive ist eine EU-Richtlinie...
+
+NOCHMAL: Kein Einleitungssatz. Kein Doppelpunkt-Fließtext. Direkt Liste.`;
 
 
 // ── Pinned Notes ──
@@ -478,10 +489,14 @@ function renderPinned() {
   const list = document.getElementById('pinnedList');
   const count = document.getElementById('pinnedCount');
   count.textContent = pinnedNotes.length;
-  section.style.display = pinnedNotes.length ? 'block' : 'none';
-  list.innerHTML = pinnedNotes.map((n, i) => 
-    `<div class="pinned-note"><button class="unpin-btn" onclick="unpinNote(${i})">✕</button>${n}</div>`
-  ).join('');
+  // Always show pinned section
+  if (pinnedNotes.length === 0) {
+    list.innerHTML = '<div style="font-size:0.7rem;color:var(--muted);padding:4px 0;">Noch keine Notizen. Tipp 📌 auf eine Chat-Antwort zum Anpinnen.</div>';
+  } else {
+    list.innerHTML = pinnedNotes.map((n, i) => 
+      `<div class="pinned-note"><button class="unpin-btn" onclick="unpinNote(${i})">✕</button>${n}</div>`
+    ).join('');
+  }
 }
 
 function togglePin(msgId, btn) {
