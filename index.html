@@ -110,7 +110,10 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .filters {
   display: flex; gap:6px; padding: 10px 14px; overflow-x: auto;
   max-width: 600px; margin: 0 auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, black 85%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 98%);
 }
 .filters::-webkit-scrollbar { display:none; }
 .pill {
@@ -450,7 +453,13 @@ function saveApiKey() {
 }
 
 function toggleChat() {
-  document.getElementById('chatPanel').classList.toggle('open');
+  const panel = document.getElementById('chatPanel');
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+  } else {
+    panel.classList.add('open');
+    document.getElementById('statsOverlay').classList.remove('open');
+  }
 }
 
 const SYSTEM_PROMPT = `Du bist der NAMA-Klausur-Tutor. Der Student lernt für die Klausur "Nachhaltigkeitsmanagement" (NAMA) an der Uni Siegen bei Prof. Mies. 
@@ -535,7 +544,15 @@ async function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if (!msg) return;
-  if (!apiKey) { alert('Erst OpenAI API Key oben eingeben (wird nur lokal gespeichert).'); return; }
+  if (!apiKey) { 
+  const errDiv = document.createElement('div');
+  errDiv.className = 'chat-msg assistant';
+  errDiv.style.cssText = 'color:var(--red);font-weight:600';
+  errDiv.textContent = '⚠️ Erst OpenAI API Key eingeben (Feld oben). Wird nur lokal gespeichert.';
+  messagesEl.appendChild(errDiv);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return; 
+}
   
   const messagesEl = document.getElementById('chatMessages');
   messagesEl.innerHTML += `<div class="chat-msg user">${msg}</div>`;
