@@ -398,7 +398,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Chat ──
-let apiKey = localStorage.getItem('nama-openai-key') || 'sk-svcac-R3ZPMkJZVkJmZjZtV2pYeEVEOVFfUGZqNTRsa1Y3bWdPc3JHREtzcXFYd2RULVNNVnRtZEhIVXNLUTJHaENVZzNEQWQtU1FB';
+let apiKey = localStorage.getItem('nama-openai-key') || '';
 document.getElementById('apiKeyInput').value = apiKey;
 if (apiKey) document.getElementById('apiKeyRow').style.display = 'none';
 
