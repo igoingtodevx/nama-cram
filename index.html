@@ -230,6 +230,39 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   .stats-toggle {{ bottom:76px; }}
 }}
 
+
+.chat-msg.assistant { position: relative; padding-right: 36px; }
+.pin-btn {
+  position: absolute; top: 4px; right: 6px;
+  background: none; border: none; font-size: 0.85rem;
+  cursor: pointer; opacity: 0.4; transition: opacity 0.15s;
+  padding: 2px 4px; border-radius: 4px;
+}
+.pin-btn:hover, .pin-btn.pinned { opacity: 1; }
+.pin-btn.pinned { background: var(--accent); }
+.pinned-section {
+  margin: 8px 14px; max-width: 600px; margin-left: auto; margin-right: auto;
+}
+.pinned-header {
+  font-size: 0.7rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 6px 0; cursor: pointer; user-select: none;
+}
+.pinned-list { display: none; }
+.pinned-list.open { display: block; }
+.pinned-note {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 6px;
+  font-size: 0.78rem; line-height: 1.5; position: relative;
+  white-space: pre-wrap;
+}
+.pinned-note .unpin-btn {
+  position: absolute; top: 3px; right: 6px;
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 0.75rem; opacity: 0.5;
+}
+.pinned-note .unpin-btn:hover { opacity: 1; color: var(--red); }
+
 </style>
 </head>
 <body>
@@ -282,6 +315,14 @@ header .stats { font-size:0.75rem; color:var(--muted); }
     <small>OpenAI API Key (gpt-5.4-mini, lokal gespeichert)</small>
     <input type="password" id="apiKeyInput" placeholder="sk-..." onchange="saveApiKey()">
   </div>
+  
+  <div class="pinned-section" id="pinnedSection" style="display:none">
+    <div class="pinned-header" onclick="document.getElementById('pinnedList').classList.toggle('open')">
+      📌 Angepinnte Notizen (<span id="pinnedCount">0</span>)
+    </div>
+    <div class="pinned-list open" id="pinnedList"></div>
+  </div>
+
   <div class="chat-messages" id="chatMessages">
     <div class="chat-msg assistant">👋 Frag mich was zur NAMA-Klausur — Abkürzungen, Konzepte, Rechenwege.</div>
   </div>
@@ -420,7 +461,60 @@ Wichtige Joker-Zahlen fürs Essay: BASF (34 Interviews, >240 IROs), DB (Scope 1 
 
 Essay-Taktik: ROADS als Checkliste + 6-Absatz-Struktur (Einstieg, Begriffe, Reg-Kette, 3 Ebenen, Chancen/Risiken, Fazit) + Satz-Punkte-Denken (jeder Satz = 1 Fachinfo, keine Schachtelsätze). NICHT blind die 25-Satz-Vorlage abschreiben — sie passt nicht zum Artikelthema.
 
-Antworte EXTREM KNAPP (max 2-3 Sätze). Kein Smalltalk. Erkläre Abkürzungen, Konzepte und Rechenwege direkt. Deutsch.`;
+ANTWORTFORMAT:
+- Formatierung: Nutze **fett** für Kernbegriffe, nummerierte Listen (1. 2. 3.) für Aufzählungen.
+- Abkürzungen: Immer fett + Definition in EINEM Satz. Kein Doppelpunkt-Geschwafel.
+- Liste: Jeder Eintrag neue Zeile mit Bindestrich.
+- Maximal 1 Leerzeile zwischen Absätzen.
+- Kein Smalltalk, kein "Gerne helfe ich dir", kein Einleitungssatz. Direkt antworten.
+- Deutsch.`;
+
+
+// ── Pinned Notes ──
+let pinnedNotes = JSON.parse(localStorage.getItem('nama-pinned') || '[]');
+
+function renderPinned() {
+  const section = document.getElementById('pinnedSection');
+  const list = document.getElementById('pinnedList');
+  const count = document.getElementById('pinnedCount');
+  count.textContent = pinnedNotes.length;
+  section.style.display = pinnedNotes.length ? 'block' : 'none';
+  list.innerHTML = pinnedNotes.map((n, i) => 
+    `<div class="pinned-note"><button class="unpin-btn" onclick="unpinNote(${i})">✕</button>${n}</div>`
+  ).join('');
+}
+
+function togglePin(msgId, btn) {
+  const el = document.getElementById(msgId);
+  const text = el.textContent.replace('📌', '').trim();
+  const idx = pinnedNotes.indexOf(text);
+  if (idx >= 0) {
+    pinnedNotes.splice(idx, 1);
+    btn.classList.remove('pinned');
+  } else {
+    pinnedNotes.push(text);
+    btn.classList.add('pinned');
+  }
+  localStorage.setItem('nama-pinned', JSON.stringify(pinnedNotes));
+  renderPinned();
+}
+
+function unpinNote(i) {
+  pinnedNotes.splice(i, 1);
+  localStorage.setItem('nama-pinned', JSON.stringify(pinnedNotes));
+  renderPinned();
+}
+
+// Initialize on load
+renderPinned();
+
+// Update init to also check pinned state on existing messages
+function initPinButtons() {
+  document.querySelectorAll('.chat-msg.assistant .pin-btn').forEach(btn => {
+    const text = btn.parentElement.textContent.replace('📌', '').trim();
+    if (pinnedNotes.includes(text)) btn.classList.add('pinned');
+  });
+}
 
 async function sendChat() {
   const input = document.getElementById('chatInput');
@@ -430,7 +524,7 @@ async function sendChat() {
   
   const messagesEl = document.getElementById('chatMessages');
   messagesEl.innerHTML += `<div class="chat-msg user">${msg}</div>`;
-  messagesEl.innerHTML += `<div class="chat-msg assistant loading">...</div>`;
+  messagesEl.innerHTML += `<div class="chat-msg assistant loading" id="loadingMsg">...</div>`;
   messagesEl.scrollTop = messagesEl.scrollHeight;
   input.value = '';
   
