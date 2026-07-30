@@ -94,7 +94,9 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   padding: 0 14px 10px; max-width: 600px; margin: 0 auto;
   display: none;
 }
-.card.flipped ~ .actions { display: flex; gap:8px; }
+.actions.visible { display: flex; gap:8px; }
+
+.card { touch-action: pan-y; }
 
 .btn {
   flex:1; padding: 12px 8px; border-radius: 10px; border: 1px solid var(--border);
@@ -169,13 +171,13 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   cursor:pointer; font-size:0.8rem;
 }
 
-.chat-api-key {
+.chat-provider {
   padding: 8px 12px; font-size:0.7rem; color:var(--muted);
   border-bottom:1px solid var(--border);
 }
-.chat-api-key input {
+.chat-provider select {
   width:100%; background:var(--bg); border:1px solid var(--border);
-  border-radius:6px; padding:6px 8px; color:var(--text); font-size:0.75rem;
+  border-radius:6px; padding:7px 8px; color:var(--text); font-size:0.75rem;
   margin-top:4px;
 }
 
@@ -315,9 +317,12 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 <button class="chat-toggle" onclick="toggleChat()" title="NAMA Assistant">💬</button>
 
 <div class="chat-panel" id="chatPanel">
-  <div class="chat-api-key" id="apiKeyRow">
-    <small>OpenAI API Key (gpt-5.4-mini, lokal gespeichert)</small>
-    <input type="password" id="apiKeyInput" placeholder="sk-..." onchange="saveApiKey()">
+  <div class="chat-provider">
+    <small>KI-Anbieter — Schlüssel liegen sicher auf dem Server</small>
+    <select id="chatProvider" onchange="saveChatProvider()" aria-label="KI-Anbieter auswählen">
+      <option value="openai">OpenAI · gpt-5.4-mini</option>
+      <option value="nvidia">NVIDIA NIM · Llama 3.1 8B</option>
+    </select>
   </div>
   
   <div class="pinned-section" id="pinnedSection">
@@ -336,91 +341,86 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   </div>
 </div>
 
+<script src="study-engine.js"></script>
 <script>
 // ── Data ──
 const ALL_CARDS = [{"id": "iv-1", "category": "🔴 Integrated Value", "exam": "Alle 4 Altklausuren", "front": "Berechnen Sie den Integrated Value. Gegeben: EBITDA (1.850/2.250/1.950/2.850), AfA 450, WACC 8,15%, FK 6.500, CO₂ (7/9,5/9/10 Mio. t), Schattenpreise (224/232/240/240). Investitionen = Abschreibungen.", "back": "**Schritt 1 - EBIT:** 1.400 | 1.800 | 1.500 | 2.400\n\n**Schritt 2 - Steuersatz:** s = 14% + 15%×1,055 = **29,825%**\n\n**Schritt 3 - FCF:** EBIT × 0,70175 → 982,45 | 1.263,15 | 1.052,63 | 1.684,20\n\n**Schritt 4 - TV_F:** 1.684,20 / 0,0815 = 20.665,0. PV via DF des Vorjahres (0,7905) → **16.336,1**\n\n**Schritt 5 - FV:** Σ PV(FCF₁₋₃) + 16.336,1 − 6.500 = **12.656,6 T€**\n\n**Schritt 6 - EV:** CO₂-Schäden (1.568|2.204|2.160|2.400). DF(2%): 0,9804|0,9612|0,9423|TV=120.000×0,9423. EV = **−118.769,7 T€**\n\n**Schritt 7 - IV:** 12.656,6 − 118.769,7 = **−106.113 T€**"}, {"id": "iv-2", "category": "🔴 Integrated Value", "exam": "Alle 4 Altklausuren", "front": "Warum überkompensiert der Environmental Value den Financial Value so stark in der IV-Berechnung? Erklären Sie mit Zahlen.", "back": "WACC 8,15% → ewige Rente ≈ **×12,3**\n\nSozialer Diskontsatz 2% → ewige Rente ≈ **×50**\n\n**Ramsey-Formel:** rˢ = δ + η·g + L\nδ=0% (Gleichbehandlung Generationen), η=1,5, g=1,3%, L=0,2% → **≈ 2,2%**\n\n„δ=0 bedeutet Gleichbehandlung heutiger und künftiger Generationen — deshalb Faktor 50 statt Faktor 12.\""}, {"id": "iv-3", "category": "🔴 Integrated Value", "exam": "SS25 PT1 & PT2", "front": "Nennen Sie die vier häufigsten Fehler in der IV-Berechnung, die Punkte kosten.", "back": "1. **Zwei Zinssätze:** Finanzspur mit WACC; Umwelt-/Sozialspur mit 2%.\n2. **TV-Zeitpunkt:** Ewige Rente liegt EINE Periode VOR der ersten Dauerzahlung → FCF₄ dauerhaft → TV Ende Jahr 3.\n3. **Fremdkapitalabzug:** GENAU EINMAL vom Enterprise Value abziehen; NIE bei EV oder SV.\n4. **Einheitenfalle:** CO₂ in Mio. Tonnen, Cashflows in T€ → durchgängig umrechnen, Annahme dokumentieren."}, {"id": "iv-4", "category": "🔴 Integrated Value", "exam": "SuSFi Übung 1, Aufgabe 6", "front": "Berechnen Sie den WACC selbst. Gegeben: β_unverschuldet 0,9489, r_f 3%, MRP 6%, r_FK 3%, EK/GK 93,19%, FK/GK 6,81%. Kein WACC gegeben!", "back": "Steuersatz s = 29,825%\n\nβ_v = 0,9489 × (1 + 0,70175 × 0,07311) = **0,9976**\n\nr_EK = 3% + 6% × 0,9976 = **8,9856%**\n\nWACC = 8,9856% × 0,93187 + 3% × 0,70175 × 0,06813 = **≈ 8,52%**\n\n⚠️ In Altklausuren war WACC GEGEBEN. Dieses Jahr evtl. SELBST berechnen!"}, {"id": "issb-1", "category": "🔴 ISSB/IFRS", "exam": "„Kommt auf jeden Fall dran\" — Dozent", "front": "Wie unterscheiden sich IFRS/ISSB von ESRS bei der Wesentlichkeit? Erstellen Sie eine vollständige Vergleichstabelle.", "back": "| Kriterium | ESRS/CSRD | IFRS S1&S2/ISSB |\n|---|---|---|\n| Wesentlichkeit | Doppelt | Single Financial Materiality |\n| Blickrichtung | Inside-Out + Outside-In | Nur Outside-In |\n| Adressat | Alle Stakeholder | Primär Investoren |\n| Rechtsnatur | EU-Recht, verpflichtend | Standard, Übernahme je Jurisdiktion |\n| Umfang | E,S,G umfassend | S1 allgemein + S2 Klima |\n\n⚡ Merksatz: „ISSB fragt: Wie wirkt NH auf Unternehmenswert? ESRS fragt ZUSÄTZLICH: Wie wirkt Unternehmen auf Umwelt/Gesellschaft?\""}, {"id": "issb-2", "category": "🔴 ISSB/IFRS", "exam": "Alle Altklausuren (10P)", "front": "Erklären Sie Aufbau und Inhalt von IFRS S1 und S2. Was bedeuten G–S–R–M?", "back": "**IFRS S1:** Allgemeine Anforderungen zu nachhaltigkeitsbezogenen Chancen/Risiken\n\n**IFRS S2:** Konkretisiert klimabezogene Chancen/Risiken\n\n**G–S–R–M:**\n- **Governance:** Wer überwacht? Prozesse, Kontrollen\n- **Strategy:** Geschäftsmodell, Transitionsplan, Resilienz\n- **Risk Management:** Identifizierung, Bewertung, Steuerung\n- **Metrics & Targets:** Kennzahlen, Ziele, Fortschritt\n\nEselsbrücke: **G**eschäftsführer **S**teuern **R**isiken **M**essbar"}, {"id": "issb-3", "category": "🔴 ISSB/IFRS", "exam": "CorpSus Übung 2", "front": "Berechnen Sie den IM-Score und FM-Score. Gegeben: Scale=4, Scope=3, Irremediability=3, P_Impact=4, Magnitude=4, P_finanziell=3. Ist das Thema wesentlich?", "back": "Severity_Impact = (4+3+3)/3 = **3,33**\n\nIM-Score = (3,33+4)/2 = **3,67**\n\nFM-Score = (4+3)/2 = **3,5**\n\nSchwelle: ≥ 3,0 → **WESENTLICH** (EINE Dimension reicht!)\n\n⚠️ Nicht sagen: „Eine Perspektive löst gesamte Berichtspflicht aus.\" Sie entscheidet nur über das THEMA."}, {"id": "essay-1", "category": "🔴 Essay", "exam": "Alle 4 Altklausuren", "front": "Schreiben Sie ein Essay zum Thema [Zeitungsartikel]. Strukturieren Sie nach dem ROADS-Framework.", "back": "**ROADS = Relevance → Ownership → Actions → Data → Stress-Test**\n\nBauplan: 8-11 Sätze Fachthema + 12-15 ROADS + 2 Sätze Urteil\n\n- **R:** Warum wichtig? Geschäftsmodell · Risiken/Chancen · Stakeholder\n- **O:** Wer verantwortet? Vorstand · Fachbereiche · Aufsichtsrat\n- **A:** Was wird getan? Wesentlichkeit · Ziele · Maßnahmen\n- **D:** Wie gesteuert? KPI · Daten/IT · IKS · Reporting\n- **S:** Wo scheitert's? Kosten/Nutzen · Greenwashing · Datenqualität"}, {"id": "essay-2", "category": "🔴 Essay", "exam": "„Studentisches Handelsblatt\"", "front": "Der Omnibus-Vorschlag reduziert die CSRD-Anwender drastisch. Diskutieren Sie Vor- und Nachteile.", "back": "| Bereich | Alt (CSRD) | Neu (Omnibus 2026) |\n|---|---|---|\n| MA | >250 | >1.000 |\n| Umsatz | >40 Mio.€ | >450 Mio.€ |\n| CSDDD | >1.000 MA | >5.000 MA |\n| Assurance | Reasonable | Nur Limited |\n\n→ 80-90% der Unternehmen fallen raus.\n\n**Urteil:** „Entlastung stärkt NH nur, wenn frei werdende Ressourcen in wirksame Steuerung fließen. Erst wollte EU NH- und Finanzberichterstattung gleichstellen — jetzt rudert sie zurück.\""}, {"id": "bio-1", "category": "🟠 Biodiversity", "exam": "SuSFi Mitschrift (4× genannt!)", "front": "Was bedeutet Biodiversität für den Finanzmarkt? Welche Risikoarten entstehen daraus?", "back": "**Doppelte Abhängigkeit:** Finanzmarkt ist von Ökosystemleistungen abhängig UND finanziert deren Zerstörung.\n\n**Drei Risiko-Arten:**\n- **Physical:** Bestäubersterben → Ernteausfall → Kreditausfall\n- **Transition:** Neue Schutzgebiete, Pestizidverbote, Lieferketten-Regulierung\n- **Systemic (Green Swan):** Nicht-linear, nicht aus Historie ableitbar, extreme Systemauswirkungen\n\n**TNFD:** Lokationsspezifisch (!), LEAP = Locate → Evaluate → Assess → Prepare"}, {"id": "bio-2", "category": "🟠 Biodiversity", "exam": "SuSFi Mitschrift", "front": "Was ist ein „Green Swan\" und warum versagen historische Modelle beim Klima-/Biodiversitätsrisiko?", "back": "Klima-/biodiversitätsbezogene Risiken, die unerwartet eintreten, extreme Auswirkungen haben und mit historischen Modellen nicht vorhersagbar sind.\n\n**Lösung:** Szenarioanalyse statt Value-at-Risk, NGFS-Szenarien, Precautionary Principle.\n\n**Eigene Meinung (so in Mitschrift verlangt!):** „Biodiversität ist der blinde Fleck der Regulatorik — während CO₂ metrisiert ist, fehlen standardisierte Natur-KPIs.\""}, {"id": "sf-1", "category": "🟠 Sustainable Finance", "exam": "SuSFi Theorie (5P)", "front": "„ESG ist keine eigene Risikoart.\" Erklären Sie diesen Satz. Welche Risikoarten sind betroffen?", "back": "ESG ist ein **TREIBER** bestehender Risiken:\n- **Transition** ↑ PD (Ausfallwahrscheinlichkeit)\n- **Physische Schäden** ↑ LGD (Verlustquote)\n\n**Betroffene Risikoarten (MaRisk):**\n- Kreditrisiko\n- Marktpreisrisiko\n- Liquiditätsrisiko\n- Operationelles Risiko"}, {"id": "sf-2", "category": "🟠 Sustainable Finance", "exam": "SuSFi Übung 3, Aufgabe 11+12", "front": "Green Bond vs Sustainability-Linked Loan: Was ist der Unterschied? Nennen Sie ein konkretes Rechenbeispiel.", "back": "**Green Bond:** Geldverwendung ist grün (Use of Proceeds), ICMA GBP\n→ Kupon 4%, YTM konv. 4,20%, Greenium 20bps → P ≈ 100 (pari)\nMehrerlös ≈ 0,88€ je 100€\n\n**SLL:** Geldverwendung frei; Zins hängt von ESG-KPI-Zielen ab (Margin Ratchet)\n→ 50 Mio.€, EURIBOR 3,5% + Basis 150bps, 0/3 KPIs → +15bps, 3/3 → −15bps\n\n**Kontrolle:** YTM > Kupon → Kurs < 100. YTM = Kupon → Kurs = 100."}, {"id": "sf-3", "category": "🟠 Sustainable Finance", "exam": "SuSFi Mitschrift", "front": "Zerlegen Sie den Credit Spread. Welchen Einfluss hat ESG/Transition auf die Komponenten?", "back": "**EL = PD × LGD × EAD**\n\n**Credit Spread = EL + Risikoprämie + Liquiditätsprämie + Marge**\n\n→ Transition ↑ PD\n→ Physisch ↓ Sicherheitenwerte → ↑ LGD\n→ Spread steigt in beiden Fällen"}, {"id": "sf-4", "category": "🟠 Sustainable Finance", "exam": "SuSFi Skript", "front": "Welche drei Methoden gibt es zur ESG-Integration im ICAAP? Welche ist die empfehlenswerteste und warum?", "back": "| Methode | Pro | Contra |\n|---|---|---|\n| Separate Quantifizierung | detailliert | riesiger Aufwand |\n| PD-Shifts | fokussiert | intransparent |\n| **ESG-Add-On** ✅ | steuerbar, transparent, proportional | Tool-Anpassung |\n\nRechenbeispiel: 100 Mio. Bestand, 20% ESG-behaftet, KSA 9.921 TEUR\n→ **Add-On = 20% × 9.921 = 1.984,2 TEUR**"}, {"id": "theo-1", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Nennen Sie 5 Stakeholder und begründen Sie deren Relevanz für Nachhaltigkeitsmanagement. (Worthaut: „Nennen Sie 5 Stakeholder\")", "back": "1. **Kunden** — Kaufentscheidung wird ESG-bewusster\n2. **Investoren** — UNPRI, ESG-Daten als Investitionsgrundlage\n3. **Mitarbeitende** — glaubwürdige Kommunikation = Talent-Wettbewerb\n4. **Gesetzgeber** — CSRD, CSDDD, steigende Compliance\n5. **NGOs** — Partnerschaft + öffentlicher Druck\n\n**Porter's Five Forces:** Kunden · Lieferanten · Wettbewerber · neue Anbieter · Substitute\n\nBeispiel: **BASF** Stakeholder Advisory Council + Human Rights Advisory Council"}, {"id": "theo-2", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Wie unterscheiden sich die drei Nachhaltigkeits-Organisationsmodelle? Wo macht welches Sinn?", "back": "| Modell | Merkmal | Trade-off |\n|---|---|---|\n| Zentrales Team | plant/koordiniert alles | schnell, ressourcenintensiv |\n| Teilintegriert | Agenda beim Team, Abteilungen setzen um | schnell etabliert, abteilungslastig |\n| Vollintegriert | Arbeitsgruppen → selbständig | Wissenstransfer, hoher Aufwand |\n\n**Kein Patentrezept** — hängt ab von Größe, Internationalität, Kompetenzen. „Es gibt keine richtige Antwort.\""}, {"id": "theo-3", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Managementsysteme für Nachhaltigkeit: Was muss man wissen? (Worthaut: „Managementsysteme: verzahnt, KEINE ISO-Normen\")", "back": "Bestehende Systeme (Energie ISO 50001, Arbeitssicherheit ISO 45001, Umwelt ISO 14001) sind bereits **verzahnt** und müssen in ein **ganzheitliches System** überführt werden.\n\n**Entscheidend ist die Integration, NICHT die einzelnen ISO-Norm-Details.**"}, {"id": "theo-4", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Was sind die vier Motive des strategischen Nachhaltigkeitsmanagements? (Merkwort: RKGW)", "back": "**R**isiken reduzieren\n**K**osten/Effizienz\n**G**esetz und Legitimität\n**W**achstum/Differenzierung\n\n⚠️ „Bestehende Motive nennen + eigene Motive ergänzen!\" (Dozent)\n→ Eigene: Resilienz Lieferkette, First-Mover-Vorteil, Talent-Attraction"}, {"id": "reg-1", "category": "🟠 Regulatorik", "exam": "CorpSus Übung 2", "front": "Nennen Sie die 9 Sorgfaltspflichten des LkSG in der richtigen Reihenfolge.", "back": "1. **Risikomanagementsystem** einrichten (§4)\n2. **Verantwortlichkeiten** festlegen (§4 Abs. 3)\n3. Regelmäßige **Risikoanalyse** (§5)\n4. **Grundsatzerklärung** (§6 Abs. 2)\n5. **Präventionsmaßnahmen** (§6 Abs. 1)\n6. **Abhilfemaßnahmen** (§7)\n7. **Beschwerdeverfahren** (§8)\n8. **Mittelbare Zulieferer** (§9) — nur bei substantiierter Kenntnis!\n9. **Dokumentation/Bericht** (§10)\n\nLkSG = PROZESSPFLICHT, keine Erfolgsgarantie\nCSDDD = breiter, ERGEBNISPFLICHTEN + zivilrechtliche Haftung"}, {"id": "reg-2", "category": "🟠 Regulatorik", "exam": "Alle Klausuren", "front": "Wann ist eine Tätigkeit EU-taxonomiekonform? (Worthaut: „1 hilft – 5 bleiben heil – Menschen geschützt\")", "back": "1. **Wesentlicher Beitrag** zu ≥1 Umweltziel\n2. **DNSH** — keine erhebliche Beeinträchtigung der anderen 5 Ziele\n3. **Minimum Safeguards** (OECD, UNGP, ILO)\n4. Technische **Bewertungskriterien** erfüllt\n\n**KPIs:** Turnover · CapEx · OpEx\n\n**Merksatz:** „Umsatz = heutiger grüner Anteil; CapEx = wohin entwickelt sich das Unternehmen.\"\n\n6 Umweltziele: **KAWKUB** = Klimaschutz · Anpassung · Wasser · Kreislauf · Umweltverschmutzung · Biodiversität"}, {"id": "calc-1", "category": "🟠 Kleine Rechenaufgaben", "exam": "SuSFi Übung 1+3", "front": "Berechnen Sie den Break-even-Point. Gegeben: Fixkosten 50.000€, Preis 120€/Stk, variable Kosten 70€/Stk.", "back": "x* = Fixkosten / (Preis − variable Kosten)\n= 50.000 / (120 − 70)\n= 50.000 / 50\n= **1.000 Stück**\n\n**LCA-Variante:** Höhere Herstellungswirkung / eingesparte Wirkung pro Nutzung (= Break-even in Nutzungen oder km)."}, {"id": "calc-2", "category": "🟠 Kleine Rechenaufgaben", "exam": "CorpSus Übungen", "front": "Berechnen Sie den Corporate Carbon Footprint. Gegeben: Stromverbrauch 500.000 kWh, Emissionsfaktor 420 g CO₂/kWh (location-based), 0 g/kWh (market-based, Ökostrom). Scope 1: 50 t, Scope 3: 200 t.", "back": "**Emissionen = Aktivitätsdaten × Emissionsfaktor**\n\nScope 2 location-based: 500.000 × 0,420 = **210 t CO₂e**\nScope 2 market-based: 500.000 × 0 = **0 t CO₂e**\n\nGesamt (location): 50 + 210 + 200 = **460 t CO₂e**\nGesamt (market): 50 + 0 + 200 = **250 t CO₂e**\n\n⚠️ Scope 2: location-based = Strommix; market-based = Vertrag/Beschaffung"}, {"id": "calc-3", "category": "🟠 Kleine Rechenaufgaben", "exam": "CorpSus Übungen", "front": "Erklären Sie das Prinzip der Materialflusskostenrechnung (MFCA) in einem Satz.", "back": "„Abfall kostet nicht nur Entsorgung — er enthält bereits bezahlte Material-, Energie- und Systemkosten.\"\n\nDas ist die gesamte Idee der MFCA: Verluste sichtbar machen, die sonst in Gemeinkosten untergehen."}, {"id": "taktik-1", "category": "⚪ Klausurtaktik", "exam": "Alle Klausuren (90 Min, 70% der Note)", "front": "Sie haben 90 Minuten für die NAMA-Klausur. Was ist die optimale Bearbeitungsreihenfolge?", "back": "**Reihenfolge:**\n1. Große Rechenaufgabe (40P) — max. 40 Min\n2. Kleine Rechenaufgabe (10-15P) — max. 15 Min\n3. Essay (25P) — max. 25 Min\n4. Theorie — Restzeit\n\n**Regel:** Punkte = Minuten. Nach Zeitlimit ABBRECHEN.\n\n**Trick:** Rechenweg IMMER hinschreiben (Methodenpunkte!), Annahmen dokumentieren, nie ein Feld leer lassen. Standard-Schlusssatz: „Die Aussagekraft hängt von Parametern ab; Sensitivitätsanalyse erforderlich.\""}, {"id": "essay-3", "category": "🔴 Essay", "exam": "Optimal: ROADS + 6 Absätze + Satz=1P-Denken", "front": "OPTIMALE ESSAY-TAKTIK: Wie kombiniere ich ROADS, die 6-Absatz-Struktur und das Satz-Punkte-Denken?", "back": "1. **NICHT** blind 25 Sätze einer Vorlage abschreiben — das passt nicht zum Artikelthema!\n\n2. **Stattdessen:** 6 Absätze à 3-5 Sätze (Crash-Plan-Struktur):\n   1) Einstieg+These — Artikelbezug, Paris 2015\n   2) Begriffsklärung — 2-3 Kernbegriffe\n   3) Regulatorische Kette — Taxonomie→CSRD→LkSG→Omnibus\n   4) Drei Ebenen — Organisation, Systeme, Strategie\n   5) Chancen+Herausforderungen\n   6) Fazit mit eigener Position\n\n3. **ROADS als Checkliste:** Jeder Absatz muss mindestens 1 ROADS-Element enthalten\n\n4. **Satz=1P-Denken:** Keine Schachtelsätze, Fakten statt Blabla"}, {"id": "joker-1", "category": "🔴 Joker-Zahlen", "exam": "Alle Essays — hebt dich sofort über Durchschnitt", "front": "Nennen Sie KONKRETE Zahlen zu den vier Praxisbeispielen (BASF, DB, GLS, Lammsbräu).", "back": "**BASF** — Stakeholder Advisory Council: **34 Interviews**, **>240 IROs** bewertet, Value-to-Society\n\n**Deutsche Bank** — Transition Plan 2025 (Netto-Null 2050):\n- Scope 1: **−66%**, Scope 2: **−84%** seit 2019\n- Scope 3.15: **34,2 Mt CO₂e** nach PCAF (93% Firmenkundenkredite)\n- **8 Sektorpfade** nach IEA NZE\n- Vorstandsvergütung an CO₂-Pfade gekoppelt\n\n**GLS Bank** — integrierte Geschäfts-, Risiko- & NH-Strategie in EINER Steuerung\n\n**Neumarkter Lammsbräu** — 100% Öko-Landbau, regionale Dialoge, enkeltauglich"}, {"id": "essay-4", "category": "🔴 Essay", "exam": "Crash-Plan + Survival Pack Synthese", "front": "Wann nutze ich welches Essay-Framework? ROADS vs. 6-Absätze vs. nummerierte Sätze?", "back": "⚠️ **NICHT:** Die Survival-Pack-Vorlage (Sätze 1-25) wortwörtlich abschreiben — Artikelthema passt nie 1:1.\n\n✅ **SO:**\n- **ROADS** = Inhaltliche Checkliste (HABE ich alle 5 Perspektiven?)\n- **6-Absatz-Struktur** (Crash-Plan) = Organisation (schreibe ich in der richtigen Reihenfolge?)\n- **Satz-Punkte-Denken** (Survival Pack) = Taktik (jeder Satz muss eine verifizierbare Fachinfo enthalten)\n\n**Merksatz:** ROADS sagt WAS, 6 Absätze sagen WO, Satz-Punkte-Denken sagt WIE."}, {"id": "theo-5", "category": "🟠 Theorie", "exam": "Survival Pack / Crash-Plan", "front": "Was sind die 4 Leitthemen der operativen NH-Umsetzung? Und der Fahrplan der Integration?", "back": "**4 Leitthemen** (kommen aus dem Skript, stehen in Survival Pack + Crash-Plan):\n1. **Daten** — einheitliche, vollständige Erfassung\n2. **Systeme/Prozesse** — validiert, formalisiert, standardisierte IT\n3. **Kontrollen** — IKS analog zum finanziellen IKS, Interne Revision\n4. **Integration** — Verknüpfung finanzieller + nichtfinanzieller Infos\n\n**Fahrplan:** Minimum Compliance → Effizienz → Differenzierung → disruptiver Veränderungsfaktor\n\n⚠️ Beides beantwortet: „Wie enabled?“ + „Was überwacht der Aufsichtsrat?“"}, {"id": "theo-6", "category": "🟠 Theorie", "exam": "Survival Pack / DCGK", "front": "Welche Rolle spielt der DCGK im Nachhaltigkeitsmanagement? (Worthaut Survival Pack: Satz 12)", "back": "**DCGK = Deutscher Corporate Governance Kodex**\n- §161 AktG, „soft law“ (weder zwingendes noch dispositives Recht)\n- „Soll“ = Empfehlung, „Sollte“ = Anregung\n- Empfiehlt Verankerung von ESG-Kriterien in Führungsprozessen und Aufsichtsratspflichten\n- Leitbild des Ehrbaren Kaufmanns\n\n**Essay-Satz:** „Der DCGK empfiehlt die Verankerung von ESG-Kriterien in Führungsprozessen und Aufsichtsratspflichten — Governance wird ernst, wenn sie vergütungswirksam wird.“"}, {"id": "theo-7", "category": "🟠 Theorie", "exam": "ULTIMATE Cheat Sheet – Maschine 4", "front": "Beschreiben Sie die vollständige Managementkette des Nachhaltigkeitsmanagements. Von der Wesentlichkeit bis zur Verbesserung.", "back": "**Die 9-stufige Managementkette:**\n\nWesentliches Thema\n→ **Strategie** — Was wollen wir erreichen?\n→ **Messbares Ziel** — Woran messen wir Erfolg?\n→ **Maßnahme + Verantwortliche + Ressourcen** — Wer macht was womit?\n→ **KPI** — Welche Kennzahl zeigt Fortschritt?\n→ **Daten und IT** — Wie erfassen wir verlässlich?\n→ **IKS** — Internes Kontrollsystem (analog Finanz-IKS)\n→ **Reporting** — Wer bekommt welche Information?\n→ **Abweichung analysieren** — Wo stehen wir vs. Ziel?\n→ **Maßnahme anpassen** — Was ändern wir?\n\n**Das beantwortet gleichzeitig:**\n• Wie wird die Organisation „enabled\"?\n• Wie wird Nachhaltigkeit steuerbar?\n• Warum braucht man ein IKS?\n• Was überwachen Vorstand und Aufsichtsrat?"}, {"id": "calc-4", "category": "🟠 Kleine Rechenaufgaben", "exam": "CorpSus Übungen", "front": "Berechnen Sie die Kosten des Hauptprodukts nach der Restwertmethode (Kuppelproduktion). Gegeben: Gesamtkosten 500.000€, Nebenprodukt-Erlöse 80.000€, Menge Hauptprodukt 10.000 Stück.", "back": "**Restwertmethode:**\n\nKosten Hauptprodukt = (Gesamtkosten − Erlösüberschüsse Nebenprodukte) / Menge Hauptprodukt\n\n= (500.000 − 80.000) / 10.000\n= 420.000 / 10.000\n= **42,00 € pro Stück**\n\n**Logik:** Die Nebenprodukte „subventionieren\" das Hauptprodukt — ihre Erlöse mindern die zurechenbaren Kosten. Nur die Restkosten trägt das Hauptprodukt."}];
 
-let cards = [...ALL_CARDS];
-let currentIndex = 0;
-let flipped = false;
-let mastered = JSON.parse(localStorage.getItem('nama-mastered') || '[]');
-let failed = JSON.parse(localStorage.getItem('nama-failed') || '[]');
 let activeFilter = 'all';
+const study = NamaStudyEngine.createStudyEngine(ALL_CARDS, localStorage);
+let flipped = false;
+let suppressClickUntil = 0;
 
-// ── Spaced Repetition ──
-function priority(c) {
-  if (failed.includes(c.id)) return 0;       // schwache Karten zuerst
-  if (mastered.includes(c.id)) return 2;     // gemeisterte zuletzt
-  return 1;                                   // neue in der Mitte
+function setFlipped(next) {
+  flipped = next;
+  document.getElementById('card').classList.toggle('flipped', flipped);
+  document.getElementById('actions').classList.toggle('visible', flipped);
 }
 
-function shuffleByPriority(arr) {
-  const groups = [[], [], []];
-  for (const c of arr) groups[priority(c)].push(c);
-  for (const g of groups) g.sort(() => Math.random() - 0.5);
-  return [...groups[0], ...groups[1], ...groups[2]];
-}
-
-function filterCards() {
-  if (activeFilter === 'all') return shuffleByPriority([...ALL_CARDS]);
-  const filtered = ALL_CARDS.filter(c => c.category === activeFilter);
-  document.getElementById("scrollHint").style.display = activeFilter === "all" ? "none" : "block";
-  return shuffleByPriority(filtered);
-}
-
-// ── Render ──
 function showCard() {
-  if (cards.length === 0) {
-    document.getElementById('cardQuestion').textContent = '🎉 Alle Karten durch!';
+  const c = study.current(activeFilter);
+  const actions = document.getElementById('actions');
+  if (!c) {
+    document.getElementById('cardQuestion').textContent = 'Für diesen Filter gibt es keine Karten.';
     document.getElementById('cardCat').textContent = '';
     document.getElementById('cardExam').textContent = '';
     document.getElementById('cardAnswer').textContent = '';
-    document.getElementById('card').classList.remove('flipped');
-    flipped = false;
-    updateStats();
-    return;
+  } else {
+    document.getElementById('cardCat').textContent = c.category;
+    document.getElementById('cardExam').textContent = '📋 ' + c.exam;
+    document.getElementById('cardQuestion').textContent = c.front;
+    document.getElementById('cardAnswer').textContent = c.back;
   }
-  const c = cards[currentIndex];
-  document.getElementById('cardCat').textContent = c.category;
-  document.getElementById('cardExam').textContent = '📋 ' + c.exam;
-  document.getElementById('cardQuestion').textContent = c.front;
-  document.getElementById('cardAnswer').textContent = c.back;
   document.getElementById('card').classList.remove('flipped');
+  actions.classList.remove('visible');
   flipped = false;
   updateStats();
 }
 
 function flipCard() {
-  flipped = !flipped;
-  document.getElementById('card').classList.toggle('flipped', flipped);
+  if (Date.now() < suppressClickUntil) return;
+  setFlipped(!flipped);
 }
 
 function rateCard(rating) {
-  const c = cards[currentIndex];
-  if (rating === 'easy') {
-    if (!mastered.includes(c.id)) mastered.push(c.id);
-    failed = failed.filter(x => x !== c.id);
-    cards.splice(currentIndex, 1);
-  } else if (rating === 'hard') {
-    if (!failed.includes(c.id)) failed.push(c.id);
-    mastered = mastered.filter(x => x !== c.id);
-  } else {
-    // medium: nichts ändern, einfach nächste
-  }
-  
-  localStorage.setItem('nama-mastered', JSON.stringify(mastered));
-  localStorage.setItem('nama-failed', JSON.stringify(failed));
-  
-  if (cards.length === 0) cards = filterCards();
-  if (currentIndex >= cards.length) currentIndex = 0;
+  const card = study.current(activeFilter);
+  if (!card || !flipped) return;
+  study.rate(card.id, rating, activeFilter);
   showCard();
 }
 
 function updateStats() {
-  const done = mastered.length + failed.filter(x => !cards.some(c => c.id === x)).length;
-  document.getElementById('stats').textContent = `${done} / ${ALL_CARDS.length}  |  ✅${mastered.length}  ❌${failed.length}  📝${cards.length}`;
-  document.getElementById('progress').style.width = (done / ALL_CARDS.length * 100) + '%';
+  const summary = study.progress();
+  document.getElementById('stats').textContent =
+    `${summary.rated} / ${summary.total} bewertet  |  ✅${summary.easy}  🤔${summary.medium}  ❌${summary.hard}`;
+  document.getElementById('progress').style.width = (summary.rated / summary.total * 100) + '%';
 }
+
+let touchStart = null;
+const cardElement = document.getElementById('card');
+cardElement.addEventListener('touchstart', event => {
+  const touch = event.changedTouches[0];
+  touchStart = { x: touch.clientX, y: touch.clientY };
+}, { passive: true });
+cardElement.addEventListener('touchend', event => {
+  if (!touchStart) return;
+  const touch = event.changedTouches[0];
+  const deltaX = touch.clientX - touchStart.x;
+  const deltaY = touch.clientY - touchStart.y;
+  touchStart = null;
+  if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 55) return;
+  event.preventDefault();
+  suppressClickUntil = Date.now() + 400;
+  if (!flipped) {
+    setFlipped(true);
+    return;
+  }
+  if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+    rateCard(deltaX > 0 ? 'easy' : 'hard');
+  } else if (deltaY < 0) {
+    rateCard('medium');
+  }
+}, { passive: false });
 
 // ── Filters ──
 document.getElementById('filters').addEventListener('click', e => {
@@ -428,8 +428,7 @@ document.getElementById('filters').addEventListener('click', e => {
   document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
   e.target.classList.add('active');
   activeFilter = e.target.dataset.cat;
-  cards = filterCards();
-  currentIndex = 0;
+  document.getElementById('scrollHint').style.display = activeFilter === 'all' ? 'none' : 'block';
   showCard();
 });
 
@@ -445,14 +444,13 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Chat ──
-let apiKey = localStorage.getItem('nama-openai-key') || '';
-document.getElementById('apiKeyInput').value = apiKey;
-if (apiKey) document.getElementById('apiKeyRow').style.display = 'none';
+let chatProvider = localStorage.getItem('nama-chat-provider') || 'openai';
+const providerSelect = document.getElementById('chatProvider');
+providerSelect.value = chatProvider;
 
-function saveApiKey() {
-  apiKey = document.getElementById('apiKeyInput').value.trim();
-  localStorage.setItem('nama-openai-key', apiKey);
-  if (apiKey) document.getElementById('apiKeyRow').style.display = 'none';
+function saveChatProvider() {
+  chatProvider = providerSelect.value === 'nvidia' ? 'nvidia' : 'openai';
+  localStorage.setItem('nama-chat-provider', chatProvider);
 }
 
 function toggleChat() {
@@ -545,41 +543,24 @@ function initPinButtons() {
 
 async function sendChat() {
   const input = document.getElementById('chatInput');
+  const messagesEl = document.getElementById('chatMessages');
   const msg = input.value.trim();
   if (!msg) return;
-  if (!apiKey) { 
-  const errDiv = document.createElement('div');
-  errDiv.className = 'chat-msg assistant';
-  errDiv.style.cssText = 'color:var(--red);font-weight:600';
-  errDiv.textContent = '⚠️ Erst OpenAI API Key eingeben (Feld oben). Wird nur lokal gespeichert.';
-  messagesEl.appendChild(errDiv);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return; 
-}
-  
-  const messagesEl = document.getElementById('chatMessages');
+
   messagesEl.innerHTML += `<div class="chat-msg user">${msg}</div>`;
   messagesEl.innerHTML += `<div class="chat-msg assistant loading" id="loadingMsg">...</div>`;
   messagesEl.scrollTop = messagesEl.scrollHeight;
   input.value = '';
   
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({
-        model: 'gpt-5.4-mini',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: msg }
-        ],
-        max_completion_tokens: 300,
-        temperature: 0.3
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: chatProvider, message: msg })
     });
     const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || 'Fehler: ' + JSON.stringify(data);
-    messagesEl.lastChild.textContent = reply;
+    if (!res.ok) throw new Error(data.error || `Serverfehler (${res.status})`);
+    messagesEl.lastChild.textContent = data.reply;
     messagesEl.lastChild.classList.remove('loading');
   } catch(e) {
     messagesEl.lastChild.textContent = 'Fehler: ' + e.message;
@@ -597,48 +578,39 @@ function toggleStats() {
 }
 
 function renderStats() {
-  const allDone = ALL_CARDS.length - cards.length;
-  const totalPct = Math.round(allDone / ALL_CARDS.length * 100);
-  
-  // Overall
+  const summary = study.progress();
+  const totalPct = Math.round(summary.rated / summary.total * 100);
+  const ratings = study.getState().ratings;
   let html = `<div style="text-align:center;margin-bottom:16px">
-    <div style="font-size:2.5rem;font-weight:700;color:var(--accent)">${allDone}</div>
-    <div style="font-size:0.75rem;color:var(--muted)">von ${ALL_CARDS.length} Karten gemeistert</div>
+    <div style="font-size:2.5rem;font-weight:700;color:var(--accent)">${summary.rated}</div>
+    <div style="font-size:0.75rem;color:var(--muted)">von ${summary.total} Karten bewertet</div>
     <div class="stat-bar" style="margin-top:8px"><div class="stat-bar-fill accent" style="width:${totalPct}%"></div></div>
   </div>`;
-  
-  // By category
+
   const cats = [...new Set(ALL_CARDS.map(c => c.category))];
   for (const cat of cats) {
     const catCards = ALL_CARDS.filter(c => c.category === cat);
-    const masteredInCat = catCards.filter(c => mastered.includes(c.id)).length;
-    const failedInCat = catCards.filter(c => failed.includes(c.id)).length;
+    const easyInCat = catCards.filter(c => ratings[c.id]?.rating === 'easy').length;
     const totalInCat = catCards.length;
-    const pct = Math.round(masteredInCat / totalInCat * 100);
+    const pct = Math.round(easyInCat / totalInCat * 100);
     const color = pct >= 80 ? 'green' : pct >= 40 ? 'orange' : 'red';
-    
     html += `<div class="stat-row">
       <span>${cat}</span>
-      <span style="font-weight:600;font-size:0.75rem">${masteredInCat}/${totalInCat}</span>
+      <span style="font-weight:600;font-size:0.75rem">${easyInCat}/${totalInCat} sicher</span>
     </div>
     <div class="stat-bar"><div class="stat-bar-fill ${color}" style="width:${pct}%"></div></div>`;
   }
-  
-  // Remaining
+
   html += `<div style="margin-top:12px;font-size:0.75rem;color:var(--muted)">
-    ✅ ${mastered.length} sicher &nbsp;|&nbsp; ❌ ${failed.length} schwach &nbsp;|&nbsp; 📝 ${cards.length} offen
+    ✅ ${summary.easy} sicher &nbsp;|&nbsp; 🤔 ${summary.medium} okay &nbsp;|&nbsp; ❌ ${summary.hard} schwer &nbsp;|&nbsp; 📝 ${summary.total - summary.rated} neu
   </div>`;
-  
   document.getElementById('statsContent').innerHTML = html;
 }
 
 // ── Cross-Device Sync ──
 function exportProgress() {
-  const data = {
-    mastered, failed,
-    timestamp: new Date().toISOString(),
-    total: ALL_CARDS.length
-  };
+  const state = study.getState();
+  const data = { version: 2, ratings: state.ratings, current: state.current, timestamp: new Date().toISOString(), total: ALL_CARDS.length };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -655,19 +627,20 @@ function importProgress(e) {
   reader.onload = function(ev) {
     try {
       const data = JSON.parse(ev.target.result);
-      if (data.mastered && data.failed) {
-        mastered = data.mastered;
-        failed = data.failed;
-        localStorage.setItem('nama-mastered', JSON.stringify(mastered));
-        localStorage.setItem('nama-failed', JSON.stringify(failed));
-        cards = filterCards();
-        currentIndex = 0;
-        showCard();
-        renderStats();
-        alert('✅ Fortschritt importiert: ' + mastered.length + ' sicher, ' + failed.length + ' schwach');
+      if (data?.ratings) {
+        study.replaceProgress(data);
+      } else if (Array.isArray(data?.mastered) && Array.isArray(data?.failed)) {
+        const ratings = {};
+        data.mastered.forEach(id => ratings[id] = { rating: 'easy', updatedAt: 0 });
+        data.failed.forEach(id => ratings[id] = { rating: 'hard', updatedAt: 0 });
+        study.replaceProgress({ ratings });
       } else {
-        alert('❌ Ungültige Datei');
+        throw new Error('Die Datei enthält keinen NAMA-Fortschritt.');
       }
+      showCard();
+      renderStats();
+      const summary = study.progress();
+      alert(`✅ Fortschritt importiert: ${summary.easy} sicher, ${summary.medium} okay, ${summary.hard} schwer`);
     } catch(err) {
       alert('❌ Fehler: ' + err.message);
     }
@@ -678,20 +651,13 @@ function importProgress(e) {
 
 function resetProgress() {
   if (confirm('Gesamten Fortschritt löschen? Das kann nicht rückgängig gemacht werden.')) {
-    mastered = [];
-    failed = [];
-    localStorage.removeItem('nama-mastered');
-    localStorage.removeItem('nama-failed');
-    cards = filterCards();
-    currentIndex = 0;
+    study.reset();
     showCard();
     renderStats();
   }
 }
 
-
 // ── Init ──
-cards = filterCards();
 showCard();
 </script>
 
