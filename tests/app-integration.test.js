@@ -100,6 +100,25 @@ test('horizontal swipe flips the card first and rates it on the next swipe', () 
   assert.match(values.get('nama-study-state-v2'), /"easy"/);
 });
 
+test('flashcards render markdown emphasis, lists, and comparison tables without allowing HTML', () => {
+  const { context } = bootApp();
+  const markdown = `| Kriterium | ESRS/CSRD | IFRS S1&S2/ISSB |
+|---|---|---|
+| **Wesentlichkeit** | Doppelt | Single Financial Materiality |
+| Blickrichtung | Inside-Out + Outside-In | Nur Outside-In |
+
+⚡ **Merksatz:** **ESRS** fragt zusätzlich nach Umweltwirkung.`;
+  const html = context.formatCardMarkdown(markdown);
+
+  assert.match(html, /<table>/);
+  assert.match(html, /<thead>/);
+  assert.match(html, /<th>Kriterium<\/th>/);
+  assert.match(html, /<strong>Wesentlichkeit<\/strong>/);
+  assert.match(html, /<strong>Merksatz:<\/strong>/);
+  assert.match(html, /<p>⚡ <strong>Merksatz:<\/strong>/);
+  assert.doesNotMatch(context.formatCardMarkdown('<script>alert(1)<\/script>'), /<script/);
+});
+
 test('chat formats pasted one-line bullet answers into a readable safe list', () => {
   const { context } = bootApp();
   const html = context.formatTutorReply('- **IV**: Gesamtwert. - **IFRS S1**: Allgemeine Offenlegung.');

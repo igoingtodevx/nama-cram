@@ -78,9 +78,18 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .card .answer {
   font-size:0.85rem; line-height:1.6;
   border-top: 1px solid var(--border); padding-top:14px; margin-top:14px;
-  white-space: pre-wrap;
   display: none;
+  overflow-x:auto;
 }
+.card .answer p { margin:0 0 10px; }
+.card .answer p:last-child { margin-bottom:0; }
+.card .answer ul, .card .answer ol { margin:0 0 10px; padding-left:20px; }
+.card .answer li + li { margin-top:5px; }
+.card .answer strong { color:#f1efff; }
+.card .answer table { width:100%; min-width:520px; border-collapse:collapse; margin:0 0 14px; font-size:0.82rem; }
+.card .answer th, .card .answer td { border:1px solid var(--border); padding:8px; text-align:left; vertical-align:top; }
+.card .answer th { background:rgba(167,139,250,0.13); color:#f1efff; font-weight:700; }
+.card .answer tr:nth-child(even) td { background:rgba(255,255,255,0.025); }
 .card.flipped .answer { display: block; }
 .card.flipped .question { color: var(--muted); font-size:0.8rem; }
 
@@ -362,6 +371,56 @@ function setFlipped(next) {
   document.getElementById('actions').classList.toggle('visible', flipped);
 }
 
+function markdownTableCells(line) {
+  return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+}
+
+function isMarkdownTableSeparator(line) {
+  return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+}
+
+function formatCardMarkdown(markdown) {
+  const lines = String(markdown || '').replace(/\r\n?/g, '\n').split('\n');
+  const html = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index].trim();
+    if (!line) { index += 1; continue; }
+
+    if (line.includes('|') && index + 1 < lines.length && isMarkdownTableSeparator(lines[index + 1])) {
+      const headers = markdownTableCells(line);
+      index += 2;
+      const rows = [];
+      while (index < lines.length && lines[index].trim().includes('|')) {
+        rows.push(markdownTableCells(lines[index]));
+        index += 1;
+      }
+      html.push(`<table><thead><tr>${headers.map(cell => `<th>${formatInline(cell)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${headers.map((_, column) => `<td>${formatInline(row[column] || '')}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
+      continue;
+    }
+
+    const unordered = line.match(/^[-*]\s+(.+)$/);
+    const ordered = line.match(/^\d+[.)]\s+(.+)$/);
+    if (unordered || ordered) {
+      const orderedList = Boolean(ordered);
+      const items = [];
+      while (index < lines.length) {
+        const match = lines[index].trim().match(orderedList ? /^\d+[.)]\s+(.+)$/ : /^[-*]\s+(.+)$/);
+        if (!match) break;
+        items.push(`<li>${formatInline(match[1])}</li>`);
+        index += 1;
+      }
+      html.push(`<${orderedList ? 'ol' : 'ul'}>${items.join('')}</${orderedList ? 'ol' : 'ul'}>`);
+      continue;
+    }
+
+    html.push(`<p>${formatInline(line)}</p>`);
+    index += 1;
+  }
+  return html.join('') || '<p>Keine Antwort vorhanden.</p>';
+}
+
 function showCard() {
   const c = study.current(activeFilter);
   const actions = document.getElementById('actions');
@@ -374,7 +433,7 @@ function showCard() {
     document.getElementById('cardCat').textContent = c.category;
     document.getElementById('cardExam').textContent = '📋 ' + c.exam;
     document.getElementById('cardQuestion').textContent = c.front;
-    document.getElementById('cardAnswer').textContent = c.back;
+    document.getElementById('cardAnswer').innerHTML = formatCardMarkdown(c.back);
   }
   document.getElementById('card').classList.remove('flipped');
   actions.classList.remove('visible');
