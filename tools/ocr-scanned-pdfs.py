@@ -23,7 +23,8 @@ CACHE_ROOT = ROOT / "knowledge" / "ocr-cache"
 OCR_MODEL = os.environ.get("NAMA_OCR_MODEL", "gpt-5.4-mini")
 
 PROMPT = """Transkribiere diese einzelne Seite einer deutschen NAMA-Altklausur vollständig und wortgetreu.
-Behalte Überschriften, Aufgaben, Teilaufgaben, Zahlen, Formeln und Tabelleninhalte bei. Gib ausschließlich den lesbaren Seitentext zurück; keine Einleitung, keine Interpretation, keine Lösung."""
+Erfasse Überschriften, Aufgaben, Teilaufgaben, Punkte, Zahlen, Formeln und jede Tabellenzelle.
+Gib kompakten Plaintext aus: keine Ausrichtung durch Leerzeichen oder Tabs, keine Bildbeschreibung und keine Lösung. Für Tabellen verwende eine Zeile pro Tabelle mit Spalten durch ` | ` getrennt. Kontrolliere vor dem Antworten, dass auch der untere Seitenbereich vollständig enthalten ist."""
 
 
 def request_ocr(image_bytes: bytes, api_key: str) -> str:
@@ -37,7 +38,7 @@ def request_ocr(image_bytes: bytes, api_key: str) -> str:
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded}", "detail": "high"}},
             ],
         }],
-        "max_completion_tokens": 2_000,
+        "max_completion_tokens": 4_000,
         "temperature": 0,
     }).encode("utf-8")
     request = Request(
