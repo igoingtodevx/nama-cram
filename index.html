@@ -152,10 +152,15 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   display:flex; flex-direction:column; gap:8px;
   max-height: 280px; font-size:0.8rem;
 }
-.chat-msg { padding:8px 12px; border-radius:10px; max-width:85%; line-height:1.5; }
-.chat-msg.user { background:var(--accent); color:#fff; align-self:flex-end; }
+.chat-msg { padding:8px 12px; border-radius:10px; max-width:85%; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
+.chat-msg.user { background:var(--accent); color:#fff; align-self:flex-end; white-space:pre-wrap; }
 .chat-msg.assistant { background:var(--border); align-self:flex-start; }
 .chat-msg.loading { opacity:0.5; }
+.chat-msg p { margin:0 0 8px; }
+.chat-msg p:last-child { margin-bottom:0; }
+.chat-msg ul { margin:0; padding-left:18px; }
+.chat-msg li + li { margin-top:6px; }
+.chat-msg strong { color:#f1efff; font-weight:700; }
 
 .chat-input-row {
   display:flex; border-top:1px solid var(--border); padding:8px;
@@ -491,26 +496,79 @@ CSRD: Die Corporate Sustainability Reporting Directive ist eine EU-Richtlinie...
 NOCHMAL: Kein Einleitungssatz. Kein Doppelpunkt-Fließtext. Direkt Liste.`;
 
 
-// ── Pinned Notes ──
+// ── Chat output and pinned notes ──
+let chatMessageCounter = 0;
 let pinnedNotes = JSON.parse(localStorage.getItem('nama-pinned') || '[]');
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+}
+
+function formatInline(value) {
+  return escapeHtml(value).replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+}
+
+function formatTutorReply(reply) {
+  const normalized = String(reply || '')
+    .trim()
+    .replace(/\r\n?/g, '\n')
+    .replace(/[ \t]+-\s+(?=\*\*[^*\n]{1,100}\*\*\s*[:—–-])/g, '\n- ');
+  if (!normalized) return '<p>Keine Antwort erhalten.</p>';
+
+  let inList = false;
+  const html = [];
+  for (const rawLine of normalized.split(/\n+/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const bullet = line.match(/^-\s+(.+)$/);
+    if (bullet) {
+      if (!inList) { html.push('<ul>'); inList = true; }
+      html.push(`<li>${formatInline(bullet[1])}</li>`);
+    } else {
+      if (inList) { html.push('</ul>'); inList = false; }
+      html.push(`<p>${formatInline(line)}</p>`);
+    }
+  }
+  if (inList) html.push('</ul>');
+  return html.join('');
+}
+
+function assistantMessageHtml(id, reply, loading = false) {
+  const content = loading ? '...' : formatTutorReply(reply);
+  return `<button class="pin-btn" onclick="togglePin('${id}', this)" title="Anpinnen">📌</button>${content}`;
+}
+
+function appendChatMessage(role, content, { loading = false } = {}) {
+  const el = document.createElement('div');
+  el.className = `chat-msg ${role}${loading ? ' loading' : ''}`;
+  if (role === 'assistant') {
+    el.id = `chatAssistant-${++chatMessageCounter}`;
+    el.innerHTML = assistantMessageHtml(el.id, content, loading);
+  } else {
+    el.textContent = content;
+  }
+  document.getElementById('chatMessages').appendChild(el);
+  return el;
+}
+
 function renderPinned() {
-  const section = document.getElementById('pinnedSection');
   const list = document.getElementById('pinnedList');
   const count = document.getElementById('pinnedCount');
   count.textContent = pinnedNotes.length;
-  // Always show pinned section
   if (pinnedNotes.length === 0) {
     list.innerHTML = '<div style="font-size:0.7rem;color:var(--muted);padding:4px 0;">Noch keine Notizen. Tipp 📌 auf eine Chat-Antwort zum Anpinnen.</div>';
   } else {
-    list.innerHTML = pinnedNotes.map((n, i) => 
-      `<div class="pinned-note"><button class="unpin-btn" onclick="unpinNote(${i})">✕</button>${n}</div>`
+    list.innerHTML = pinnedNotes.map((note, index) =>
+      `<div class="pinned-note"><button class="unpin-btn" onclick="unpinNote(${index})">✕</button>${formatTutorReply(note)}</div>`
     ).join('');
   }
 }
 
 function togglePin(msgId, btn) {
   const el = document.getElementById(msgId);
+  if (!el) return;
   const text = el.textContent.replace('📌', '').trim();
   const idx = pinnedNotes.indexOf(text);
   if (idx >= 0) {
@@ -530,16 +588,7 @@ function unpinNote(i) {
   renderPinned();
 }
 
-// Initialize on load
 renderPinned();
-
-// Update init to also check pinned state on existing messages
-function initPinButtons() {
-  document.querySelectorAll('.chat-msg.assistant .pin-btn').forEach(btn => {
-    const text = btn.parentElement.textContent.replace('📌', '').trim();
-    if (pinnedNotes.includes(text)) btn.classList.add('pinned');
-  });
-}
 
 async function sendChat() {
   const input = document.getElementById('chatInput');
@@ -547,8 +596,8 @@ async function sendChat() {
   const msg = input.value.trim();
   if (!msg) return;
 
-  messagesEl.innerHTML += `<div class="chat-msg user">${msg}</div>`;
-  messagesEl.innerHTML += `<div class="chat-msg assistant loading" id="loadingMsg">...</div>`;
+  appendChatMessage('user', msg);
+  const replyEl = appendChatMessage('assistant', '', { loading: true });
   messagesEl.scrollTop = messagesEl.scrollHeight;
   input.value = '';
   
@@ -560,11 +609,11 @@ async function sendChat() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `Serverfehler (${res.status})`);
-    messagesEl.lastChild.textContent = data.reply;
-    messagesEl.lastChild.classList.remove('loading');
+    replyEl.innerHTML = assistantMessageHtml(replyEl.id, data.reply);
+    replyEl.classList.remove('loading');
   } catch(e) {
-    messagesEl.lastChild.textContent = 'Fehler: ' + e.message;
-    messagesEl.lastChild.classList.remove('loading');
+    replyEl.innerHTML = assistantMessageHtml(replyEl.id, `**Fehler**: ${e.message}`);
+    replyEl.classList.remove('loading');
   }
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }

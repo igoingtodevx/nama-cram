@@ -100,12 +100,22 @@ test('horizontal swipe flips the card first and rates it on the next swipe', () 
   assert.match(values.get('nama-study-state-v2'), /"easy"/);
 });
 
-test('chat sends the selected provider to the same-origin server proxy', async () => {
+test('chat formats pasted one-line bullet answers into a readable safe list', () => {
+  const { context } = bootApp();
+  const html = context.formatTutorReply('- **IV**: Gesamtwert. - **IFRS S1**: Allgemeine Offenlegung.');
+
+  assert.match(html, /^<ul>/);
+  assert.match(html, /<li><strong>IV<\/strong>: Gesamtwert\.<\/li>/);
+  assert.match(html, /<li><strong>IFRS S1<\/strong>: Allgemeine Offenlegung\.<\/li>/);
+  assert.doesNotMatch(context.formatTutorReply('<img src=x onerror=alert(1)>'), /<img/);
+});
+
+test('chat gives every dynamic assistant reply a pin button and sends the selected provider', async () => {
   const { context, getElementById, values } = bootApp();
   const calls = [];
   context.fetch = async (url, options) => {
     calls.push({ url, options });
-    return { ok: true, status: 200, json: async () => ({ reply: 'DNSH-Testantwort' }) };
+    return { ok: true, status: 200, json: async () => ({ reply: '- **DNSH**: Kein erheblicher Schaden.' }) };
   };
   getElementById('chatProvider').value = 'nvidia';
   context.saveChatProvider();
@@ -117,4 +127,7 @@ test('chat sends the selected provider to the same-origin server proxy', async (
   assert.equal(calls[0].url, '/api/chat');
   assert.deepEqual(JSON.parse(calls[0].options.body), { provider: 'nvidia', message: 'Was ist DNSH?' });
   assert.equal(values.get('nama-chat-provider'), 'nvidia');
+  const assistantReply = getElementById('chatMessages').children.at(-1);
+  assert.match(assistantReply.innerHTML, /class="pin-btn"/);
+  assert.match(assistantReply.innerHTML, /<ul>/);
 });

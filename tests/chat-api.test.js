@@ -50,7 +50,7 @@ test('routes an OpenAI selection to OpenAI without exposing the key', async () =
   assert.equal(request.options.headers.Authorization, 'Bearer oa-test');
   const payload = JSON.parse(request.options.body);
   assert.equal(payload.model, 'gpt-5.4-mini');
-  assert.equal(payload.max_completion_tokens, 300);
+  assert.equal(payload.max_completion_tokens, 900);
 });
 
 test('routes a NVIDIA selection to NVIDIA NIM with its compatible token parameter', async () => {
@@ -70,6 +70,6 @@ test('routes a NVIDIA selection to NVIDIA NIM with its compatible token paramete
   assert.equal(request.options.headers.Authorization, 'Bearer nv-test');
   const payload = JSON.parse(request.options.body);
   assert.equal(payload.model, 'meta/llama-3.1-8b-instruct');
-  assert.equal(payload.max_tokens, 300);
+  assert.equal(payload.max_tokens, 900);
   assert.equal('max_completion_tokens' in payload, false);
 });

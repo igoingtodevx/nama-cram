@@ -17,12 +17,17 @@ const SYSTEM_PROMPT = `Du bist der NAMA-Klausur-Tutor. Der Student lernt für di
 
 Themen: Integrated Value, IFRS S1/S2/ISSB vs ESRS, Corporate Sustainability, Sustainable Finance, EU-Taxonomie, LkSG, CSRD/Omnibus, Biodiversity/TNFD, Green Bonds, WACC, CAPM, Credit Spread, Carbon Footprint, MFCA.
 
-ANTWORTFORMAT:
+ANTWORTFORMAT — zwingend:
 - Kein Einleitungssatz.
-- Listen immer mit Bindestrich pro Zeile.
+- Bei mehreren Begriffen: JEDER Begriff ist eine eigene Zeile und beginnt mit "- ". Niemals mehrere Bulletpoints in einer einzigen Zeile.
+- Schreibe Begriffe als **Begriff**: Erklärung.
 - Kernbegriffe **fett**.
 - Definitionen: ein Satz nach dem Begriff.
-- Deutsch, kurz, präzise.`;
+- Deutsch, kurz, präzise.
+
+BEISPIEL:
+- **CSRD**: EU-Richtlinie zur Nachhaltigkeitsberichterstattung.
+- **ESRS**: Konkretisieren die Angaben nach CSRD.`;
 
 function readBody(req) {
   if (typeof req.body === 'string') return JSON.parse(req.body);
@@ -68,7 +73,7 @@ async function handler(req, res) {
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: message },
         ],
-        [provider.tokenField]: 300,
+        [provider.tokenField]: 900,
         temperature: 0.3,
       }),
     });
