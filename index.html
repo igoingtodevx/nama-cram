@@ -148,18 +148,21 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 
 .chat-panel {
   position:fixed; bottom:80px; right:16px; z-index:99;
-  width: min(380px, calc(100vw - 32px)); max-height: 420px;
+  width: min(760px, calc(100vw - 32px)); height:min(72dvh, 680px);
   background: var(--card); border:1px solid var(--border);
-  border-radius: 14px; display:none; flex-direction:column;
+  border-radius: 16px; display:none; flex-direction:column;
   box-shadow: 0 8px 40px rgba(0,0,0,0.5);
   overflow: hidden;
 }
 .chat-panel.open { display:flex; }
+.chat-titlebar { display:flex; align-items:center; justify-content:space-between; padding:11px 14px 8px; color:#f1efff; border-bottom:1px solid var(--border); font-size:.9rem; }
+.chat-titlebar button { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1.15rem; line-height:1; padding:2px 4px; }
+.chat-titlebar button:hover { color:#fff; }
 
 .chat-messages {
-  flex:1; overflow-y:auto; padding:12px;
-  display:flex; flex-direction:column; gap:8px;
-  max-height: 280px; font-size:0.8rem;
+  flex:1; min-height:0; overflow-y:auto; padding:15px 16px;
+  display:flex; flex-direction:column; gap:10px;
+  font-size:0.9rem;
 }
 .chat-msg { padding:8px 12px; border-radius:10px; max-width:85%; line-height:1.5; white-space:normal; overflow-wrap:anywhere; }
 .chat-msg.user { background:var(--accent); color:#fff; align-self:flex-end; white-space:pre-wrap; }
@@ -178,7 +181,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 }
 .chat-input-row input {
   flex:1; background:var(--bg); border:1px solid var(--border);
-  border-radius:8px; padding:10px; color:var(--text); font-size:0.8rem;
+  border-radius:10px; padding:13px 14px; color:var(--text); font-size:0.92rem;
   outline:none;
 }
 .chat-input-row button {
@@ -248,6 +251,11 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .stat-bar-fill.accent { background:var(--accent); }
 
 @media (max-width:480px) {
+  .chat-panel { right:10px; bottom:72px; width:calc(100vw - 20px); height:78dvh; }
+  .chat-messages { padding:12px; font-size:.86rem; }
+  .chat-msg { max-width:92%; }
+  .chat-input-row { padding:9px; }
+  .chat-input-row input { padding:12px; }
   .stats-toggle { bottom:76px; }
 }
 
@@ -263,6 +271,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .pin-btn.pinned { background: var(--accent); }
 .pinned-section {
   margin: 8px 14px; max-width: 600px; margin-left: auto; margin-right: auto;
+  max-height:180px; overflow-y:auto;
 }
 .pinned-header {
   font-size: 0.7rem; font-weight: 600; color: var(--muted);
@@ -273,10 +282,13 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .pinned-list.open { display: block; }
 .pinned-note {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 8px 10px; margin-bottom: 6px;
+  border-radius: 8px; padding: 34px 10px 8px; margin-bottom: 6px;
   font-size: 0.78rem; line-height: 1.5; position: relative;
   white-space: pre-wrap;
 }
+.pinned-note-actions { position:absolute; top:5px; left:7px; right:6px; display:flex; align-items:center; gap:6px; }
+.note-card-btn { background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.45); color:#e5e0ff; border-radius:6px; padding:3px 7px; font:600 .66rem/1.2 inherit; cursor:pointer; }
+.note-card-btn.saved { background:rgba(34,197,94,.11); border-color:rgba(34,197,94,.45); color:#d9ffe4; }
 .pinned-note .unpin-btn {
   position: absolute; top: 3px; right: 6px;
   background: none; border: none; color: var(--muted);
@@ -331,6 +343,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 <div class="filters" id="filters">
   <button class="pill active" data-cat="all">Alle</button>
   <button class="pill" data-cat="🔥 High Priority">🔥 Fokus</button>
+  <button class="pill" data-cat="📌 Eigene Notizen">📌 Eigene</button>
   <button class="pill" data-cat="🔴 Integrated Value">🔴 IV</button>
   <button class="pill" data-cat="🔴 ISSB/IFRS">🔴 ISSB</button>
   <button class="pill" data-cat="🔴 Essay">🔴 Essay</button>
@@ -363,11 +376,12 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 
 <!-- Chat Widget -->
 
-<button class="stats-toggle" onclick="toggleStats()" title="Fortschritt">📊</button>
+<button class="stats-toggle" id="statsToggle" onclick="toggleStats()" title="Fortschritt">📊</button>
 
-<button class="chat-toggle" onclick="toggleChat()" title="NAMA Assistant">💬</button>
+<button class="chat-toggle" id="chatToggle" onclick="toggleChat()" title="NAMA Assistant">💬</button>
 
 <div class="chat-panel" id="chatPanel">
+  <div class="chat-titlebar"><strong>🧠 NAMA Tutor</strong><button type="button" onclick="closeChat()" aria-label="Tutor schließen">✕</button></div>
   <div class="chat-provider">
     <small>KI-Anbieter — Schlüssel liegen sicher auf dem Server</small>
     <select id="chatProvider" onchange="saveChatProvider()" aria-label="KI-Anbieter auswählen">
@@ -399,8 +413,34 @@ const ALL_CARDS = [{"id": "iv-1", "category": "🔴 Integrated Value", "exam": "
 
 const CRASH_COURSE_STEPS = [{"number":1,"title":"Integrated Value","time":"60 Min. · Kernaufgabe","task":"Rechne die IV-Blaupause einmal vollständig selbst: Finanzwert, Umweltwert und Interpretation.","originalTask":"/crash-assets/01-integrated-value-task.webp","officialSolution":"/crash-assets/01-integrated-value-solution.webp","shortAnswer":"EBIT = EBITDA − AfA; s = 29,825 %; FCF = EBIT × 0,70175. FV = ΣPV(FCF) + PV(TV) − FK; EV = −ΣPV(CO₂ × Schattenpreis) bei 2 %; IV = FV + EV. TV liegt eine Periode vor der ersten ewigen Zahlung.","sourceNote":"Original: SuSFi Übung 1, Aufgabe 7. Offizielle Lösung: SuSFi Übung 1, Lösungsseiten 18–19."},{"number":2,"title":"Taxonomie-KPIs","time":"45 Min. · sichere Punkte","task":"Trenne taxonomiefähig von taxonomiekonform und berechne Umsatz-, CapEx- und OpEx-KPI.","originalTask":"/crash-assets/02-taxonomie-kpis-task.webp","officialSolution":"/crash-assets/02-taxonomie-kpis-solution.webp","shortAnswer":"Taxonomiekonform ist nur, was wesentlich beiträgt UND DNSH UND Minimum Safeguards erfüllt. KPI = konformer Zähler / Gesamtnenner. Beim CapEx-Plan gehört qualifizierter Plan-CapEx in den Nenner; erst dann sauber neu rechnen.","sourceNote":"Original: CorpSus Übung 3, Aufgabe 16. Offizielle Lösung: CorpSus Übung 3, Lösungsseiten 13–15."},{"number":3,"title":"ISSB vs. ESRS","time":"45 Min. · 10-Punkte-Block","task":"Löse die doppelte Wesentlichkeit als Originalfall und verknüpfe sie mit der Prüfungs-Tabelle ISSB versus ESRS.","originalTask":"/crash-assets/03-wesentlichkeit-task.webp","officialSolution":"/crash-assets/03-wesentlichkeit-solution.webp","shortAnswer":"ESRS: doppelte Wesentlichkeit = Impact UND finanzielle Wesentlichkeit. IFRS S1/S2: finanzielle Wesentlichkeit. Beide strukturieren über Governance, Strategie, Risikomanagement sowie Metriken & Ziele. Bei ESRS genügt eine wesentliche Dimension für Berichtspflicht.","sourceNote":"Original: CorpSus Übung 2, Aufgabe 8. Offizielle Lösung: CorpSus Ergänzungen, Lösungsseiten 6–10."},{"number":4,"title":"Essay-Maschine","time":"35 Min. · Antwortgerüst","task":"Nimm die Implementierungsaufgabe als Blaupause für jede offene CorpSus-Frage.","originalTask":"/crash-assets/04-essay-task.webp","officialSolution":"/crash-assets/04-essay-solution.webp","shortAnswer":"Definition → Relevanz → Regulatorik (Paris → Green Deal → EU-Aktionsplan → Taxonomie/CSRD/Omnibus) → Organisation, Systeme, Strategie → je zwei Chancen und Hürden → klare eigene Position. Immer am Unternehmen anwenden, nicht nur Schlagworte aufzählen.","sourceNote":"Original: CorpSus Übung 1, Aufgabe 4. Offizielle Lösung: CorpSus Übung 1, Lösungsseiten 10–11."},{"number":5,"title":"WACC/CAPM + kleine SuSFi-Bausteine","time":"45 Min. · Rechen-Sicherheit","task":"Berechne WACC von Grund auf und sage danach in einem Satz, was jeder Baustein ökonomisch bedeutet.","originalTask":"/crash-assets/05-wacc-capm-task.webp","officialSolution":"/crash-assets/05-wacc-capm-solution.webp","shortAnswer":"βv = βu × [1 + (1 − s) × FK/EK]; rEK = rf + βv × Marktrisikoprämie; WACC = rEK × EK/GK + (1 − s) × rFK × FK/GK. Danach Barwerte immer mit dem zugehörigen Zeitpunkt diskontieren, Einheiten sichtbar halten.","sourceNote":"Original: SuSFi Übung 1, Aufgabe 6. Offizielle Lösung: SuSFi Übung 1, Lösungsseiten 13–15."},{"number":6,"title":"Produktrechnung","time":"40 Min. · CorpSus-Rechnen","task":"Rechne eine Produkt-CO₂-Bilanz und leite aus dem Ergebnis den Break-even ab.","originalTask":"/crash-assets/06-produktrechnung-task.webp","officialSolution":"/crash-assets/06-produktrechnung-solution.webp","shortAnswer":"Zuerst funktionale Einheit festlegen, dann alle Lebenszyklus-Module addieren. Beim Mehrweg: Fixemissionen durch Umläufe teilen und variable Emissionen addieren. Break-even dort, wo PCF Mehrweg = PCF Einweg; Ergebnis immer als ganze Mindest-Umlaufzahl formulieren.","sourceNote":"Original: CorpSus Übung 3, Aufgabe 14. Offizielle Lösung: CorpSus Übung 3, Lösungsseiten 4–5."},{"number":7,"title":"Kapitel 4 & Theorie","time":"35 Min. · saubere Textpunkte","task":"Übe Stakeholder und Engagement als Antwort, die gleichzeitig Organisation und Umsetzung erklärt.","originalTask":"/crash-assets/07-kapitel4-theorie-task.webp","officialSolution":"/crash-assets/07-kapitel4-theorie-solution.webp","shortAnswer":"Nenne Stakeholder + konkretes Interesse + Einfluss: Kunden, Mitarbeitende, Kapitalgeber, NGOs, Lieferanten. Engagement heißt relevante Gruppen zielgerichtet und kontinuierlich einbeziehen: identifizieren → priorisieren → informieren/dialogisieren → auswerten → zurückspiegeln.","sourceNote":"Original: CorpSus Übung 1, Aufgaben 5–6. Offizielle Lösung: CorpSus Übung 1, Lösungsseiten 13–16."},{"number":8,"title":"Reserve-Rechnen","time":"35 Min. · Green Bond","task":"Bewerte den Green Bond zuerst ohne und dann mit Greenium; erkläre den Preisunterschied in einem Satz.","originalTask":"/crash-assets/08-reserve-rechnen-task.webp","officialSolution":"/crash-assets/08-reserve-rechnen-solution.webp","shortAnswer":"P = Σ CFt/(1+y)^t. Sinkt die geforderte Rendite durch Greenium, steigt der Kurs. Hier: ohne Green-Label ca. 99,12 je 100 Nominal; als Green Bond bei YTM = Kupon genau 100. Emittentenvorteil = Mehrerlös minus glaubhafte GBP-Kosten.","sourceNote":"Original: SuSFi Übung 3, Aufgabe 12. Offizielle Lösung: SuSFi Übung 3, Lösungsseiten 15–17."}];
 
+const NOTE_CARDS_STORAGE_KEY = 'nama-note-cards-v1';
+const OWN_NOTES_CATEGORY = '📌 Eigene Notizen';
+
+function loadNoteCards() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(NOTE_CARDS_STORAGE_KEY) || '[]');
+    if (!Array.isArray(stored)) return [];
+    const ids = new Set();
+    return stored.filter(card => {
+      const valid = card && typeof card.id === 'string' && typeof card.front === 'string' && typeof card.back === 'string'
+        && card.category === OWN_NOTES_CATEGORY && !ids.has(card.id);
+      if (valid) ids.add(card.id);
+      return valid;
+    });
+  } catch {
+    return [];
+  }
+}
+
+let noteCards = loadNoteCards();
+let allCards = [...ALL_CARDS, ...noteCards];
 let activeFilter = 'all';
-const study = NamaStudyEngine.createStudyEngine(ALL_CARDS, localStorage);
+let study = NamaStudyEngine.createStudyEngine(allCards, localStorage);
+
+function rebuildStudy() {
+  allCards = [...ALL_CARDS, ...noteCards];
+  study = NamaStudyEngine.createStudyEngine(allCards, localStorage);
+}
 let flipped = false;
 let suppressClickUntil = 0;
 
@@ -579,12 +619,18 @@ function saveChatProvider() {
 
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
-  if (panel.classList.contains('open')) {
-    panel.classList.remove('open');
-  } else {
-    panel.classList.add('open');
+  const opening = !panel.classList.contains('open');
+  panel.classList.toggle('open', opening);
+  document.getElementById('chatToggle').hidden = opening;
+  document.getElementById('statsToggle').hidden = opening;
+  if (opening) {
     document.getElementById('statsOverlay').classList.remove('open');
   }
+}
+
+function closeChat() {
+  const panel = document.getElementById('chatPanel');
+  if (panel.classList.contains('open')) toggleChat();
 }
 
 // Der Tutor-Prompt lebt ausschließlich serverseitig in /api/chat.js; so bleibt der Browser ohne Prompt-/Schlüsselduplikat.
@@ -650,6 +696,10 @@ function appendChatMessage(role, content, { loading = false } = {}) {
   return el;
 }
 
+function isNoteSavedAsCard(note) {
+  return noteCards.some(card => card.note === note);
+}
+
 function renderPinned() {
   const list = document.getElementById('pinnedList');
   const count = document.getElementById('pinnedCount');
@@ -657,10 +707,41 @@ function renderPinned() {
   if (pinnedNotes.length === 0) {
     list.innerHTML = '<div style="font-size:0.7rem;color:var(--muted);padding:4px 0;">Noch keine Notizen. Tipp 📌 auf eine Chat-Antwort zum Anpinnen.</div>';
   } else {
-    list.innerHTML = pinnedNotes.map((note, index) =>
-      `<div class="pinned-note"><button class="unpin-btn" onclick="unpinNote(${index})">✕</button>${formatTutorReply(note)}</div>`
-    ).join('');
+    list.innerHTML = pinnedNotes.map((note, index) => {
+      const saved = isNoteSavedAsCard(note);
+      return `<div class="pinned-note"><div class="pinned-note-actions"><button class="note-card-btn${saved ? ' saved' : ''}" onclick="saveNoteAsCard(${index})" title="Als eigene Lernkarte speichern">${saved ? '✅ Als Karte gespeichert' : '🃏 Als Karte speichern'}</button><button class="unpin-btn" onclick="unpinNote(${index})" title="Notiz entfernen">✕</button></div>${formatTutorReply(note)}</div>`;
+    }).join('');
   }
+}
+
+function saveNoteAsCard(index) {
+  const note = pinnedNotes[index];
+  if (typeof note !== 'string' || !note.trim() || isNoteSavedAsCard(note)) return;
+  const preview = note.replace(/\s+/g, ' ').trim().slice(0, 90);
+  const front = prompt('Welche Frage soll vorne auf der Karte stehen?', `Was musst du zu dieser Notiz wissen?\n${preview}`);
+  if (front === null || !front.trim()) return;
+
+  noteCards.push({
+    id: `own-note-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    category: OWN_NOTES_CATEGORY,
+    exam: '📌 Eigene Chat-Notiz · lokal gesichert',
+    front: front.trim(),
+    back: note,
+    note,
+    createdAt: Date.now(),
+  });
+  localStorage.setItem(NOTE_CARDS_STORAGE_KEY, JSON.stringify(noteCards));
+  rebuildStudy();
+  renderPinned();
+}
+
+function showOwnNotesDeck() {
+  activeFilter = OWN_NOTES_CATEGORY;
+  document.querySelectorAll('.pill').forEach(pill => pill.classList.toggle('active', pill.dataset.cat === activeFilter));
+  document.getElementById('scrollHint').style.display = 'block';
+  document.getElementById('chatPanel').classList.remove('open');
+  showMode('study');
+  showCard();
 }
 
 function togglePin(msgId, btn) {
@@ -680,6 +761,7 @@ function togglePin(msgId, btn) {
 }
 
 function unpinNote(i) {
+  if (!confirm('Diese angepinnte Notiz entfernen? Eine bereits gespeicherte eigene Karte bleibt erhalten.')) return;
   pinnedNotes.splice(i, 1);
   localStorage.setItem('nama-pinned', JSON.stringify(pinnedNotes));
   renderPinned();
@@ -733,9 +815,9 @@ function renderStats() {
     <div class="stat-bar" style="margin-top:8px"><div class="stat-bar-fill accent" style="width:${totalPct}%"></div></div>
   </div>`;
 
-  const cats = [...new Set(ALL_CARDS.map(c => c.category))];
+  const cats = [...new Set(allCards.map(c => c.category))];
   for (const cat of cats) {
-    const catCards = ALL_CARDS.filter(c => c.category === cat);
+    const catCards = allCards.filter(c => c.category === cat);
     const easyInCat = catCards.filter(c => ratings[c.id]?.rating === 'easy').length;
     const totalInCat = catCards.length;
     const pct = Math.round(easyInCat / totalInCat * 100);
@@ -756,7 +838,7 @@ function renderStats() {
 // ── Cross-Device Sync ──
 function exportProgress() {
   const state = study.getState();
-  const data = { version: 2, ratings: state.ratings, current: state.current, timestamp: new Date().toISOString(), total: ALL_CARDS.length };
+  const data = { version: 2, ratings: state.ratings, current: state.current, timestamp: new Date().toISOString(), total: allCards.length };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

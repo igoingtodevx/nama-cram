@@ -40,8 +40,8 @@ function readCards() {
   return JSON.parse(match[1]);
 }
 
-function bootApp() {
-  const values = new Map();
+function bootApp(initialStorage = {}) {
+  const values = new Map(Object.entries(initialStorage));
   const elements = new Map();
   const getElementById = id => {
     if (!elements.has(id)) elements.set(id, new Element());
@@ -82,7 +82,7 @@ function bootApp() {
 
 test('ships an eight-step crash course with original task and solution evidence', () => {
   const html = fs.readFileSync('index.html', 'utf8');
-  const match = html.match(/const CRASH_COURSE_STEPS = (\[.*?\]);\n\nlet activeFilter/s);
+  const match = html.match(/const CRASH_COURSE_STEPS = (\[.*?\]);\n\nconst NOTE_CARDS_STORAGE_KEY/s);
   assert.ok(match, 'CRASH_COURSE_STEPS must be serialised in index.html');
   const steps = JSON.parse(match[1]);
 
@@ -103,6 +103,52 @@ test('ships an eight-step crash course with original task and solution evidence'
     assert.ok(step.sourceNote.length >= 20, `${step.title} needs source transparency`);
   }
   assert.doesNotMatch(JSON.stringify(steps), /LkSG|Lieferkettengesetz/i);
+});
+
+test('opening the larger tutor hides floating controls and exposes an in-panel close action', () => {
+  const { context, getElementById } = bootApp();
+
+  context.toggleChat();
+  assert.equal(getElementById('chatPanel').classList.contains('open'), true);
+  assert.equal(getElementById('chatToggle').hidden, true);
+  assert.equal(getElementById('statsToggle').hidden, true);
+
+  context.closeChat();
+  assert.equal(getElementById('chatPanel').classList.contains('open'), false);
+  assert.equal(getElementById('chatToggle').hidden, false);
+  assert.equal(getElementById('statsToggle').hidden, false);
+});
+
+test('saves a pinned tutor note as a separate persistent custom flashcard', () => {
+  const originalNote = 'DNSH: Kein erheblicher Schaden. Taxonomiekonform nur mit wesentlichem Beitrag, DNSH und Minimum Safeguards.';
+  const { context, getElementById, values } = bootApp({
+    'nama-pinned': JSON.stringify([originalNote]),
+  });
+  context.prompt = () => 'Wann ist eine Aktivität taxonomiekonform?';
+
+  context.saveNoteAsCard(0);
+
+  const noteCards = JSON.parse(values.get('nama-note-cards-v1'));
+  assert.equal(noteCards.length, 1);
+  assert.equal(noteCards[0].category, '📌 Eigene Notizen');
+  assert.equal(noteCards[0].front, 'Wann ist eine Aktivität taxonomiekonform?');
+  assert.equal(noteCards[0].back, originalNote);
+  assert.equal(values.get('nama-pinned'), JSON.stringify([originalNote]), 'saving must never delete the original pin');
+  assert.match(getElementById('pinnedList').innerHTML, /Als Karte gespeichert/);
+
+  context.showOwnNotesDeck();
+  assert.equal(getElementById('cardQuestion').textContent, 'Wann ist eine Aktivität taxonomiekonform?');
+});
+
+test('does not create a duplicate custom card for the same pinned note', () => {
+  const note = 'Eine wiederholte Notiz';
+  const { context, values } = bootApp({ 'nama-pinned': JSON.stringify([note]) });
+  context.prompt = () => 'Eine Frage';
+
+  context.saveNoteAsCard(0);
+  context.saveNoteAsCard(0);
+
+  assert.equal(JSON.parse(values.get('nama-note-cards-v1')).length, 1);
 });
 
 test('crash course mode switches away from flashcards without changing flashcard progress', () => {
