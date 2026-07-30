@@ -35,8 +35,8 @@ class Element {
 
 function readCards() {
   const html = fs.readFileSync('index.html', 'utf8');
-  const match = html.match(/const ALL_CARDS = (\[.*?\]);\n\nlet activeFilter/s);
-  assert.ok(match, 'ALL_CARDS must be serialised in index.html');
+  const match = html.match(/const ALL_CARDS = (\[.*?\]);\n\nconst CRASH_COURSE_STEPS/s);
+  assert.ok(match, 'ALL_CARDS must be serialised in index.html before crash-course data');
   return JSON.parse(match[1]);
 }
 
@@ -79,6 +79,45 @@ function bootApp() {
   vm.runInContext(scripts[0][1], context, { filename: 'index-inline.js' });
   return { context, getElementById, values };
 }
+
+test('ships an eight-step crash course with original task and solution evidence', () => {
+  const html = fs.readFileSync('index.html', 'utf8');
+  const match = html.match(/const CRASH_COURSE_STEPS = (\[.*?\]);\n\nlet activeFilter/s);
+  assert.ok(match, 'CRASH_COURSE_STEPS must be serialised in index.html');
+  const steps = JSON.parse(match[1]);
+
+  assert.match(html, /id="studyTab"/);
+  assert.match(html, /id="crashTab"/);
+  assert.match(html, /id="crashCourse"/);
+  assert.equal(steps.length, 8);
+  assert.deepEqual(steps.map(step => step.title), [
+    'Integrated Value', 'Taxonomie-KPIs', 'ISSB vs. ESRS', 'Essay-Maschine',
+    'WACC/CAPM + kleine SuSFi-Bausteine', 'Produktrechnung', 'Kapitel 4 & Theorie', 'Reserve-Rechnen',
+  ]);
+  for (const step of steps) {
+    assert.match(step.originalTask, /^\/crash-assets\/.+\.webp$/);
+    assert.match(step.officialSolution, /^\/crash-assets\/.+\.webp$/);
+    assert.equal(fs.existsSync(`.${step.originalTask}`), true, `${step.title} needs its original task image`);
+    assert.equal(fs.existsSync(`.${step.officialSolution}`), true, `${step.title} needs its official solution image`);
+    assert.ok(step.shortAnswer.length >= 45, `${step.title} needs a real maximal-kurz answer`);
+    assert.ok(step.sourceNote.length >= 20, `${step.title} needs source transparency`);
+  }
+  assert.doesNotMatch(JSON.stringify(steps), /LkSG|Lieferkettengesetz/i);
+});
+
+test('crash course mode switches away from flashcards without changing flashcard progress', () => {
+  const { context, getElementById } = bootApp();
+  context.showMode('crash');
+
+  assert.equal(getElementById('studyView').hidden, true);
+  assert.equal(getElementById('crashCourse').hidden, false);
+  assert.equal(getElementById('crashTab').classList.contains('active'), true);
+  assert.equal(getElementById('studyTab').classList.contains('active'), false);
+
+  context.showMode('study');
+  assert.equal(getElementById('studyView').hidden, false);
+  assert.equal(getElementById('crashCourse').hidden, true);
+});
 
 test('prioritises the announced lecture blocks without active LkSG learning', () => {
   const cards = readCards();
