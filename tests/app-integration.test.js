@@ -33,6 +33,13 @@ class Element {
   click() {}
 }
 
+function readCards() {
+  const html = fs.readFileSync('index.html', 'utf8');
+  const match = html.match(/const ALL_CARDS = (\[.*?\]);\n\nlet activeFilter/s);
+  assert.ok(match, 'ALL_CARDS must be serialised in index.html');
+  return JSON.parse(match[1]);
+}
+
 function bootApp() {
   const values = new Map();
   const elements = new Map();
@@ -72,6 +79,18 @@ function bootApp() {
   vm.runInContext(scripts[0][1], context, { filename: 'index-inline.js' });
   return { context, getElementById, values };
 }
+
+test('prioritises the announced lecture blocks without active LkSG learning', () => {
+  const cards = readCards();
+  const priorityCards = cards.filter(card => card.category === '🔥 High Priority');
+  const corpus = priorityCards.map(card => `${card.front}\n${card.back}`).join('\n');
+
+  assert.equal(priorityCards.length, 5);
+  for (const phrase of ['ESG', 'SDGs', 'Paris', 'Taxonomie-KPIs', 'DB Transition Plan', 'ICMA', 'Sustainability-Linked Loan', 'Risikotragfähigkeit']) {
+    assert.match(corpus, new RegExp(phrase, 'i'));
+  }
+  assert.doesNotMatch(cards.map(card => `${card.front}\n${card.back}`).join('\n'), /LkSG|Lieferkettengesetz|neun Sorgfaltspflichten|Grundaufbau.*LkSG/i);
+});
 
 test('page reveals rating buttons, rates a card, advances, and persists state', () => {
   const { context, getElementById, values } = bootApp();

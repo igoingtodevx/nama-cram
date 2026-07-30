@@ -42,6 +42,11 @@ def clean_text(value: str) -> str:
     return value.strip()
 
 
+def is_exam_excluded(content: str) -> bool:
+    """Omit topics explicitly excluded from the current NAMA exam scope."""
+    return bool(re.search(r"\bLkSG\b|Lieferkettensorgfaltspflichtengesetz|Lieferkettengesetz", content, re.IGNORECASE))
+
+
 def chunk_text(text: str) -> list[str]:
     text = clean_text(text)
     if not text:
@@ -80,7 +85,7 @@ def extract_chunks(source_dir: Path) -> tuple[list[dict], list[dict], list[dict]
         extracted_pages = 0
         for page_number, page in enumerate(document, start=1):
             page_text = clean_text(page.get_text("text", sort=True))
-            page_chunks = chunk_text(page_text)
+            page_chunks = [chunk for chunk in chunk_text(page_text) if not is_exam_excluded(chunk)]
             if page_chunks:
                 extracted_pages += 1
             for offset, content in enumerate(page_chunks, start=1):
@@ -99,7 +104,7 @@ def extract_chunks(source_dir: Path) -> tuple[list[dict], list[dict], list[dict]
                 cache = json.loads(cache_path.read_text(encoding="utf-8"))
                 for cached_page in cache.get("pages", []):
                     page_number = int(cached_page.get("page", 0))
-                    page_chunks = chunk_text(str(cached_page.get("text", "")))
+                    page_chunks = [chunk for chunk in chunk_text(str(cached_page.get("text", ""))) if not is_exam_excluded(chunk)]
                     if page_chunks:
                         extracted_pages += 1
                     for offset, content in enumerate(page_chunks, start=1):

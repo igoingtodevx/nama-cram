@@ -20,11 +20,16 @@ function formatSources(items) {
   return [...new Set(items.map(sourceLabel))];
 }
 
+function isExcludedExamContent(chunk) {
+  return /\bLkSG\b|Lieferkettensorgfaltspflichtengesetz|Lieferkettengesetz/i.test(`${chunk?.source || ''}\n${chunk?.content || ''}`);
+}
+
 function retrieveRelevant(index, queryEmbedding, { limit = 4, maxContextChars = 5_500 } = {}) {
   const chunks = Array.isArray(index?.chunks) ? index.chunks : [];
   if (!chunks.length) return { matches: [], sources: [], context: '' };
 
   const matches = chunks
+    .filter(chunk => !isExcludedExamContent(chunk))
     .map(chunk => ({ ...chunk, score: cosineSimilarity(queryEmbedding, chunk.embedding) }))
     .filter(chunk => chunk.score > 0)
     .sort((left, right) => right.score - left.score)

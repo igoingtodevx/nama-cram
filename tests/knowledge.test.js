@@ -27,6 +27,20 @@ test('retrieves the semantically closest chunks, caps context, and keeps source 
   assert.ok(result.context.length <= 300);
 });
 
+test('does not retrieve LkSG-only chunks for the current exam scope', () => {
+  const index = {
+    chunks: [
+      { id: 'lksg', source: 'LkSG-Skript', page: 55, content: 'LkSG: neun Sorgfaltspflichten im Lieferkettengesetz.', embedding: [1, 0] },
+      { id: 'omnibus', source: 'Regulatorik', page: 51, content: 'Das Omnibus-Verfahren vereinfacht die CSRD-Berichtspflicht.', embedding: [0.99, 0.01] },
+    ],
+  };
+
+  const result = retrieveRelevant(index, [1, 0], { limit: 2, maxContextChars: 300 });
+
+  assert.deepEqual(result.matches.map(item => item.id), ['omnibus']);
+  assert.doesNotMatch(result.context, /LkSG|Lieferkettengesetz/i);
+});
+
 test('creates a 512-dimensional query embedding through the server-side OpenAI endpoint', async () => {
   let request;
   const vector = await createQueryEmbedding('WACC berechnen', 'oa-test', async (url, options) => {

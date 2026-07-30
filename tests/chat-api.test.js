@@ -64,6 +64,20 @@ test('routes an OpenAI selection to OpenAI without exposing the key', async () =
   assert.equal(payload.max_completion_tokens, 900);
 });
 
+test('answers an explicit LkSG question only with the exam-exclusion emergency sentence', async () => {
+  process.env.OPENAI_API_KEY = 'oa-test';
+  global.fetch = async () => { throw new Error('LkSG must not trigger an upstream call'); };
+  const res = responseRecorder();
+
+  await handler({ method: 'POST', body: { provider: 'openai', message: 'Welche neun Sorgfaltspflichten hat das LkSG?' } }, res);
+
+  assert.deepEqual(res.body, {
+    reply: '**LkSG**: Nicht klausurrelevant; nur merken: Lieferkettenrisiken können weiterhin als ESG-Risiken vorkommen.',
+    provider: 'notfallhinweis',
+    sources: [],
+  });
+});
+
 test('injects retrieved source excerpts into the tutor prompt and returns source labels', async () => {
   process.env.OPENAI_API_KEY = 'oa-test';
   knowledge.retrieveRelevant = () => ({

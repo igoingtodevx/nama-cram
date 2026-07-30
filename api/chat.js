@@ -19,7 +19,9 @@ const PROVIDERS = {
 
 const SYSTEM_PROMPT = `Du bist der NAMA-Klausur-Tutor. Der Student lernt für die Klausur "Nachhaltigkeitsmanagement" (NAMA) an der Uni Siegen bei Prof. Mies.
 
-Themen: Integrated Value, IFRS S1/S2/ISSB vs ESRS, Corporate Sustainability, Sustainable Finance, EU-Taxonomie, LkSG, CSRD/Omnibus, Biodiversity/TNFD, Green Bonds, WACC, CAPM, Credit Spread, Carbon Footprint, MFCA.
+Themen: Integrated Value, IFRS S1/S2/ISSB vs ESRS, Corporate Sustainability, Sustainable Finance, EU-Taxonomie, CSRD/Omnibus, Biodiversity/TNFD, Green Bonds, WACC, CAPM, Credit Spread, Carbon Footprint, MFCA.
+
+Das Lieferkettensorgfaltspflichtengesetz (LkSG) ist laut Dozent ausdrücklich nicht klausurrelevant. Bei einer expliziten LkSG-Frage liefere ausschließlich den Notfallhinweis; erkläre keine Sorgfaltspflichten und ziehe keine LkSG-Quellen heran.
 
 ANTWORTFORMAT — zwingend:
 - Kein Einleitungssatz.
@@ -67,6 +69,12 @@ ${retrieval.context}
 Nutze diese Abschnitte vorrangig. Wenn sie die Frage nicht tragen, sage das knapp statt etwas zu erfinden.`;
 }
 
+function isExplicitLksgQuestion(message) {
+  return /\bLkSG\b|Lieferkettensorgfaltspflichtengesetz|Lieferkettengesetz/i.test(message);
+}
+
+const LKS_G_NOTFALLHINWEIS = '**LkSG**: Nicht klausurrelevant; nur merken: Lieferkettenrisiken können weiterhin als ESG-Risiken vorkommen.';
+
 async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -85,6 +93,9 @@ async function handler(req, res) {
   const message = typeof body.message === 'string' ? body.message.trim() : '';
   if (!message) return sendJson(res, 400, { error: 'Die Frage fehlt.' });
   if (message.length > 2_000) return sendJson(res, 400, { error: 'Die Frage ist zu lang (maximal 2.000 Zeichen).' });
+  if (isExplicitLksgQuestion(message)) {
+    return sendJson(res, 200, { reply: LKS_G_NOTFALLHINWEIS, provider: 'notfallhinweis', sources: [] });
+  }
 
   const apiKey = process.env[provider.envKey];
   if (!apiKey) return sendJson(res, 503, { error: `${providerName === 'nvidia' ? 'NVIDIA NIM' : 'OpenAI'} ist noch nicht konfiguriert.` });
