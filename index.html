@@ -305,7 +305,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   background:var(--card); color:var(--muted); font-size:.78rem; font-weight:700; cursor:pointer;
 }
 .mode-tab.active { background:rgba(167,139,250,.18); border-color:var(--accent); color:#f1efff; }
-.study-view[hidden], .crash-course[hidden] { display:none; }
+.study-view[hidden], .crash-course[hidden], .essay-course[hidden] { display:none; }
 .crash-course { max-width:760px; margin:0 auto; padding:10px 14px 28px; }
 .crash-intro { color:var(--muted); font-size:.82rem; line-height:1.55; margin:0 0 12px; }
 .crash-step { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:15px; margin:10px 0; }
@@ -320,6 +320,100 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 .crash-evidence { margin-top:9px; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:#fff; }
 .crash-evidence img { display:block; width:100%; height:auto; }
 .crash-evidence figcaption { background:var(--card); color:var(--muted); padding:7px 9px; font-size:.68rem; }
+
+/* ── 20-minute essay course ── */
+.essay-course { max-width:760px; margin:0 auto; padding:10px 14px 34px; }
+.essay-hero {
+  background:linear-gradient(145deg,rgba(167,139,250,.18),rgba(59,130,246,.08));
+  border:1px solid rgba(167,139,250,.48); border-radius:16px; padding:16px; margin-bottom:11px;
+}
+.essay-eyebrow { color:var(--accent); font-size:.68rem; font-weight:800; letter-spacing:.7px; text-transform:uppercase; }
+.essay-hero h2 { color:#f1efff; font-size:1.2rem; margin:5px 0 7px; }
+.essay-hero p { color:var(--text); font-size:.82rem; line-height:1.55; }
+.essay-rule {
+  margin-top:11px; padding:10px 11px; border-radius:9px; background:rgba(8,8,10,.55);
+  color:#fff; font-size:.84rem; font-weight:800; text-align:center;
+}
+.essay-timer-row { display:flex; gap:8px; align-items:center; margin-top:11px; }
+.essay-timer {
+  flex:1; border:1px solid var(--border); background:var(--bg); border-radius:9px;
+  padding:9px 10px; font:800 1rem/1 ui-monospace,SFMono-Regular,Consolas,monospace; color:#fff; text-align:center;
+}
+.essay-timer-btn {
+  border:1px solid var(--accent); background:rgba(167,139,250,.17); color:#f1efff;
+  border-radius:9px; padding:9px 12px; font-size:.73rem; font-weight:800; cursor:pointer;
+}
+.essay-plan {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:10px 0;
+}
+.essay-plan div {
+  background:var(--card); border:1px solid var(--border); border-radius:10px; padding:9px;
+  font-size:.7rem; line-height:1.4; color:var(--muted);
+}
+.essay-plan strong { display:block; color:#f1efff; font-size:.76rem; margin-bottom:2px; }
+.basik-card, .essay-warning {
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin:10px 0;
+}
+.basik-card h3, .essay-warning h3 { color:#f1efff; font-size:.95rem; margin-bottom:7px; }
+.basik-card > p, .essay-warning p { font-size:.78rem; line-height:1.5; color:var(--muted); }
+.basik-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:10px; }
+.basik-item { border:1px solid var(--border); border-radius:9px; padding:8px 7px; font-size:.67rem; line-height:1.35; }
+.basik-item b { display:block; color:var(--accent); font-size:.95rem; margin-bottom:2px; }
+.essay-warning { border-color:rgba(255,140,66,.38); background:rgba(255,140,66,.055); }
+.essay-warning strong { color:#ffd7bd; }
+.essay-exam {
+  background:var(--card); border:1px solid var(--border); border-radius:14px; margin:11px 0; overflow:hidden;
+}
+.essay-exam > summary {
+  cursor:pointer; list-style:none; padding:14px 44px 14px 14px; position:relative;
+}
+.essay-exam > summary::-webkit-details-marker { display:none; }
+.essay-exam > summary::after { content:"＋"; position:absolute; right:15px; top:17px; color:var(--accent); font-weight:900; }
+.essay-exam[open] > summary::after { content:"−"; }
+.essay-exam-title { display:block; color:#f1efff; font-size:.95rem; font-weight:800; }
+.essay-exam-meta { display:block; color:var(--accent); font-size:.68rem; margin-top:3px; }
+.essay-exam-body { border-top:1px solid var(--border); padding:14px; }
+.essay-prompt {
+  border-left:3px solid var(--blue); padding:10px 11px; background:rgba(59,130,246,.07);
+  border-radius:0 8px 8px 0; font-size:.78rem; line-height:1.5; margin-bottom:12px;
+}
+.essay-memory {
+  background:rgba(34,197,94,.07); border:1px solid rgba(34,197,94,.28); border-radius:10px;
+  padding:10px 11px; color:#d9ffe4; font-size:.76rem; line-height:1.45; margin-bottom:12px;
+}
+.essay-block { margin:12px 0; }
+.essay-block h4 { color:#f1efff; font-size:.83rem; margin-bottom:3px; }
+.essay-block-hint { color:var(--muted); font-size:.68rem; line-height:1.4; margin-bottom:7px; }
+.essay-sentences { list-style:none; counter-reset:essay-point var(--start, 0); }
+.essay-sentences li {
+  counter-increment:essay-point; display:grid; grid-template-columns:25px 24px 1fr; gap:6px;
+  align-items:start; border-top:1px solid var(--border); padding:7px 0; font-size:.76rem; line-height:1.43;
+}
+.essay-sentences li::before {
+  content:counter(essay-point); color:var(--muted); font:700 .66rem/20px ui-monospace,SFMono-Regular,Consolas,monospace;
+  text-align:center;
+}
+.basik-chip {
+  display:inline-block; width:20px; height:20px; border-radius:6px; text-align:center;
+  font:800 .65rem/20px ui-monospace,SFMono-Regular,Consolas,monospace;
+  color:#f1efff; background:rgba(167,139,250,.18); border:1px solid rgba(167,139,250,.38);
+}
+.essay-verdict {
+  display:grid; grid-template-columns:25px 24px 1fr; gap:6px; align-items:start;
+  border:1px solid rgba(34,197,94,.35); background:rgba(34,197,94,.07); border-radius:9px;
+  padding:9px 7px; font-size:.78rem; line-height:1.45; margin-top:10px;
+}
+.essay-verdict .point-number { color:var(--green); text-align:center; font:800 .68rem/20px ui-monospace,SFMono-Regular,Consolas,monospace; }
+.essay-source { color:var(--muted); font-size:.66rem; line-height:1.45; margin-top:11px; }
+.essay-source strong { color:var(--text); }
+
+@media (max-width:600px) {
+  .mode-tabs { gap:5px; }
+  .mode-tab { padding:9px 5px; font-size:.7rem; }
+  .essay-plan { grid-template-columns:repeat(2,1fr); }
+  .basik-grid { grid-template-columns:repeat(2,1fr); }
+  .basik-item:last-child { grid-column:1 / -1; }
+}
 
 </style>
 </head>
@@ -337,6 +431,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 <nav class="mode-tabs" aria-label="Lernmodus">
   <button class="mode-tab active" id="studyTab" type="button" onclick="showMode('study')">🃏 Karten</button>
   <button class="mode-tab" id="crashTab" type="button" onclick="showMode('crash')">🚀 Crashkurs</button>
+  <button class="mode-tab" id="essayTab" type="button" onclick="showMode('essay')">✍️ Essay</button>
 </nav>
 
 <div class="study-view" id="studyView">
@@ -373,6 +468,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 </div>
 
 <section class="crash-course" id="crashCourse" hidden aria-label="NAMA Crashkurs"></section>
+<section class="essay-course" id="essayCourse" hidden aria-label="Essay-Crashkurs"></section>
 
 <!-- Chat Widget -->
 
@@ -412,6 +508,115 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 const ALL_CARDS = [{"id": "iv-1", "category": "🔴 Integrated Value", "exam": "Alle 4 Altklausuren", "front": "Berechnen Sie den Integrated Value. Gegeben: EBITDA (1.850/2.250/1.950/2.850), AfA 450, WACC 8,15%, FK 6.500, CO₂ (7/9,5/9/10 Mio. t), Schattenpreise (224/232/240/240). Investitionen = Abschreibungen.", "back": "**Schritt 1 - EBIT:** 1.400 | 1.800 | 1.500 | 2.400\n\n**Schritt 2 - Steuersatz:** s = 14% + 15%×1,055 = **29,825%**\n\n**Schritt 3 - FCF:** EBIT × 0,70175 → 982,45 | 1.263,15 | 1.052,63 | 1.684,20\n\n**Schritt 4 - TV_F:** 1.684,20 / 0,0815 = 20.665,0. PV via DF des Vorjahres (0,7905) → **16.336,1**\n\n**Schritt 5 - FV:** Σ PV(FCF₁₋₃) + 16.336,1 − 6.500 = **12.656,6 T€**\n\n**Schritt 6 - EV:** CO₂-Schäden (1.568|2.204|2.160|2.400). DF(2%): 0,9804|0,9612|0,9423|TV=120.000×0,9423. EV = **−118.769,7 T€**\n\n**Schritt 7 - IV:** 12.656,6 − 118.769,7 = **−106.113 T€**"}, {"id": "iv-2", "category": "🔴 Integrated Value", "exam": "Alle 4 Altklausuren", "front": "Warum überkompensiert der Environmental Value den Financial Value so stark in der IV-Berechnung? Erklären Sie mit Zahlen.", "back": "WACC 8,15% → ewige Rente ≈ **×12,3**\n\nSozialer Diskontsatz 2% → ewige Rente ≈ **×50**\n\n**Ramsey-Formel:** rˢ = δ + η·g + L\nδ=0% (Gleichbehandlung Generationen), η=1,5, g=1,3%, L=0,2% → **≈ 2,2%**\n\n„δ=0 bedeutet Gleichbehandlung heutiger und künftiger Generationen — deshalb Faktor 50 statt Faktor 12.\""}, {"id": "iv-3", "category": "🔴 Integrated Value", "exam": "SS25 PT1 & PT2", "front": "Nennen Sie die vier häufigsten Fehler in der IV-Berechnung, die Punkte kosten.", "back": "1. **Zwei Zinssätze:** Finanzspur mit WACC; Umwelt-/Sozialspur mit 2%.\n2. **TV-Zeitpunkt:** Ewige Rente liegt EINE Periode VOR der ersten Dauerzahlung → FCF₄ dauerhaft → TV Ende Jahr 3.\n3. **Fremdkapitalabzug:** GENAU EINMAL vom Enterprise Value abziehen; NIE bei EV oder SV.\n4. **Einheitenfalle:** CO₂ in Mio. Tonnen, Cashflows in T€ → durchgängig umrechnen, Annahme dokumentieren."}, {"id": "iv-4", "category": "🔴 Integrated Value", "exam": "SuSFi Übung 1, Aufgabe 6", "front": "Berechnen Sie den WACC selbst. Gegeben: β_unverschuldet 0,9489, r_f 3%, MRP 6%, r_FK 3%, EK/GK 93,19%, FK/GK 6,81%. Kein WACC gegeben!", "back": "Steuersatz s = 29,825%\n\nβ_v = 0,9489 × (1 + 0,70175 × 0,07311) = **0,9976**\n\nr_EK = 3% + 6% × 0,9976 = **8,9856%**\n\nWACC = 8,9856% × 0,93187 + 3% × 0,70175 × 0,06813 = **≈ 8,52%**\n\n⚠️ In Altklausuren war WACC GEGEBEN. Dieses Jahr evtl. SELBST berechnen!"}, {"id": "issb-1", "category": "🔴 ISSB/IFRS", "exam": "„Kommt auf jeden Fall dran\" — Dozent", "front": "Wie unterscheiden sich IFRS/ISSB von ESRS bei der Wesentlichkeit? Erstellen Sie eine vollständige Vergleichstabelle.", "back": "| Kriterium | ESRS/CSRD | IFRS S1&S2/ISSB |\n|---|---|---|\n| Wesentlichkeit | Doppelt | Single Financial Materiality |\n| Blickrichtung | Inside-Out + Outside-In | Nur Outside-In |\n| Adressat | Alle Stakeholder | Primär Investoren |\n| Rechtsnatur | EU-Recht, verpflichtend | Standard, Übernahme je Jurisdiktion |\n| Umfang | E,S,G umfassend | S1 allgemein + S2 Klima |\n\n⚡ Merksatz: „ISSB fragt: Wie wirkt NH auf Unternehmenswert? ESRS fragt ZUSÄTZLICH: Wie wirkt Unternehmen auf Umwelt/Gesellschaft?\""}, {"id": "issb-2", "category": "🔴 ISSB/IFRS", "exam": "Alle Altklausuren (10P)", "front": "Erklären Sie Aufbau und Inhalt von IFRS S1 und S2. Was bedeuten G–S–R–M?", "back": "**IFRS S1:** Allgemeine Anforderungen zu nachhaltigkeitsbezogenen Chancen/Risiken\n\n**IFRS S2:** Konkretisiert klimabezogene Chancen/Risiken\n\n**G–S–R–M:**\n- **Governance:** Wer überwacht? Prozesse, Kontrollen\n- **Strategy:** Geschäftsmodell, Transitionsplan, Resilienz\n- **Risk Management:** Identifizierung, Bewertung, Steuerung\n- **Metrics & Targets:** Kennzahlen, Ziele, Fortschritt\n\nEselsbrücke: **G**eschäftsführer **S**teuern **R**isiken **M**essbar"}, {"id": "issb-3", "category": "🔴 ISSB/IFRS", "exam": "CorpSus Übung 2", "front": "Berechnen Sie den IM-Score und FM-Score. Gegeben: Scale=4, Scope=3, Irremediability=3, P_Impact=4, Magnitude=4, P_finanziell=3. Ist das Thema wesentlich?", "back": "Severity_Impact = (4+3+3)/3 = **3,33**\n\nIM-Score = (3,33+4)/2 = **3,67**\n\nFM-Score = (4+3)/2 = **3,5**\n\nSchwelle: ≥ 3,0 → **WESENTLICH** (EINE Dimension reicht!)\n\n⚠️ Nicht sagen: „Eine Perspektive löst gesamte Berichtspflicht aus.\" Sie entscheidet nur über das THEMA."}, {"id": "essay-1", "category": "🔴 Essay", "exam": "Alle 4 Altklausuren", "front": "Schreiben Sie ein Essay zum Thema [Zeitungsartikel]. Strukturieren Sie nach dem ROADS-Framework.", "back": "**ROADS = Relevance → Ownership → Actions → Data → Stress-Test**\n\nBauplan: 8-11 Sätze Fachthema + 12-15 ROADS + 2 Sätze Urteil\n\n- **R:** Warum wichtig? Geschäftsmodell · Risiken/Chancen · Stakeholder\n- **O:** Wer verantwortet? Vorstand · Fachbereiche · Aufsichtsrat\n- **A:** Was wird getan? Wesentlichkeit · Ziele · Maßnahmen\n- **D:** Wie gesteuert? KPI · Daten/IT · IKS · Reporting\n- **S:** Wo scheitert's? Kosten/Nutzen · Greenwashing · Datenqualität"}, {"id": "essay-2", "category": "🔴 Essay", "exam": "„Studentisches Handelsblatt\"", "front": "Der Omnibus-Vorschlag reduziert die CSRD-Anwender drastisch. Diskutieren Sie Vor- und Nachteile.", "back": "| Bereich | Alt (CSRD) | Neu (Omnibus 2026) |\n|---|---|---|\n| MA | >250 | >1.000 |\n| Umsatz | >40 Mio.€ | >450 Mio.€ |\n| CSDDD | >1.000 MA | >5.000 MA |\n| Assurance | Reasonable | Nur Limited |\n\n→ 80-90% der Unternehmen fallen raus.\n\n**Urteil:** „Entlastung stärkt NH nur, wenn frei werdende Ressourcen in wirksame Steuerung fließen. Erst wollte EU NH- und Finanzberichterstattung gleichstellen — jetzt rudert sie zurück.\""}, {"id": "bio-1", "category": "🟠 Biodiversity", "exam": "SuSFi Mitschrift (4× genannt!)", "front": "Was bedeutet Biodiversität für den Finanzmarkt? Welche Risikoarten entstehen daraus?", "back": "**Doppelte Abhängigkeit:** Finanzmarkt ist von Ökosystemleistungen abhängig UND finanziert deren Zerstörung.\n\n**Drei Risiko-Arten:**\n- **Physical:** Bestäubersterben → Ernteausfall → Kreditausfall\n- **Transition:** Neue Schutzgebiete, Pestizidverbote, Lieferketten-Regulierung\n- **Systemic (Green Swan):** Nicht-linear, nicht aus Historie ableitbar, extreme Systemauswirkungen\n\n**TNFD:** Lokationsspezifisch (!), LEAP = Locate → Evaluate → Assess → Prepare"}, {"id": "bio-2", "category": "🟠 Biodiversity", "exam": "SuSFi Mitschrift", "front": "Was ist ein „Green Swan\" und warum versagen historische Modelle beim Klima-/Biodiversitätsrisiko?", "back": "Klima-/biodiversitätsbezogene Risiken, die unerwartet eintreten, extreme Auswirkungen haben und mit historischen Modellen nicht vorhersagbar sind.\n\n**Lösung:** Szenarioanalyse statt Value-at-Risk, NGFS-Szenarien, Precautionary Principle.\n\n**Eigene Meinung (so in Mitschrift verlangt!):** „Biodiversität ist der blinde Fleck der Regulatorik — während CO₂ metrisiert ist, fehlen standardisierte Natur-KPIs.\""}, {"id": "sf-1", "category": "🟠 Sustainable Finance", "exam": "SuSFi Theorie (5P)", "front": "„ESG ist keine eigene Risikoart.\" Erklären Sie diesen Satz. Welche Risikoarten sind betroffen?", "back": "ESG ist ein **TREIBER** bestehender Risiken:\n- **Transition** ↑ PD (Ausfallwahrscheinlichkeit)\n- **Physische Schäden** ↑ LGD (Verlustquote)\n\n**Betroffene Risikoarten (MaRisk):**\n- Kreditrisiko\n- Marktpreisrisiko\n- Liquiditätsrisiko\n- Operationelles Risiko"}, {"id": "sf-2", "category": "🟠 Sustainable Finance", "exam": "SuSFi Übung 3, Aufgabe 11+12", "front": "Green Bond vs Sustainability-Linked Loan: Was ist der Unterschied? Nennen Sie ein konkretes Rechenbeispiel.", "back": "**Green Bond:** Geldverwendung ist grün (Use of Proceeds), ICMA GBP\n→ Kupon 4%, YTM konv. 4,20%, Greenium 20bps → P ≈ 100 (pari)\nMehrerlös ≈ 0,88€ je 100€\n\n**SLL:** Geldverwendung frei; Zins hängt von ESG-KPI-Zielen ab (Margin Ratchet)\n→ 50 Mio.€, EURIBOR 3,5% + Basis 150bps, 0/3 KPIs → +15bps, 3/3 → −15bps\n\n**Kontrolle:** YTM > Kupon → Kurs < 100. YTM = Kupon → Kurs = 100."}, {"id": "sf-3", "category": "🟠 Sustainable Finance", "exam": "SuSFi Mitschrift", "front": "Zerlegen Sie den Credit Spread. Welchen Einfluss hat ESG/Transition auf die Komponenten?", "back": "**EL = PD × LGD × EAD**\n\n**Credit Spread = EL + Risikoprämie + Liquiditätsprämie + Marge**\n\n→ Transition ↑ PD\n→ Physisch ↓ Sicherheitenwerte → ↑ LGD\n→ Spread steigt in beiden Fällen"}, {"id": "sf-4", "category": "🟠 Sustainable Finance", "exam": "SuSFi Skript", "front": "Welche drei Methoden gibt es zur ESG-Integration im ICAAP? Welche ist die empfehlenswerteste und warum?", "back": "| Methode | Pro | Contra |\n|---|---|---|\n| Separate Quantifizierung | detailliert | riesiger Aufwand |\n| PD-Shifts | fokussiert | intransparent |\n| **ESG-Add-On** ✅ | steuerbar, transparent, proportional | Tool-Anpassung |\n\nRechenbeispiel: 100 Mio. Bestand, 20% ESG-behaftet, KSA 9.921 TEUR\n→ **Add-On = 20% × 9.921 = 1.984,2 TEUR**"}, {"id": "theo-1", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Nennen Sie 5 Stakeholder und begründen Sie deren Relevanz für Nachhaltigkeitsmanagement. (Worthaut: „Nennen Sie 5 Stakeholder\")", "back": "1. **Kunden** — Kaufentscheidung wird ESG-bewusster\n2. **Investoren** — UNPRI, ESG-Daten als Investitionsgrundlage\n3. **Mitarbeitende** — glaubwürdige Kommunikation = Talent-Wettbewerb\n4. **Gesetzgeber** — CSRD, CSDDD, steigende Compliance\n5. **NGOs** — Partnerschaft + öffentlicher Druck\n\n**Porter's Five Forces:** Kunden · Lieferanten · Wettbewerber · neue Anbieter · Substitute\n\nBeispiel: **BASF** Stakeholder Advisory Council + Human Rights Advisory Council"}, {"id": "theo-2", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Wie unterscheiden sich die drei Nachhaltigkeits-Organisationsmodelle? Wo macht welches Sinn?", "back": "| Modell | Merkmal | Trade-off |\n|---|---|---|\n| Zentrales Team | plant/koordiniert alles | schnell, ressourcenintensiv |\n| Teilintegriert | Agenda beim Team, Abteilungen setzen um | schnell etabliert, abteilungslastig |\n| Vollintegriert | Arbeitsgruppen → selbständig | Wissenstransfer, hoher Aufwand |\n\n**Kein Patentrezept** — hängt ab von Größe, Internationalität, Kompetenzen. „Es gibt keine richtige Antwort.\""}, {"id": "theo-3", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Managementsysteme für Nachhaltigkeit: Was muss man wissen? (Worthaut: „Managementsysteme: verzahnt, KEINE ISO-Normen\")", "back": "Bestehende Systeme (Energie ISO 50001, Arbeitssicherheit ISO 45001, Umwelt ISO 14001) sind bereits **verzahnt** und müssen in ein **ganzheitliches System** überführt werden.\n\n**Entscheidend ist die Integration, NICHT die einzelnen ISO-Norm-Details.**"}, {"id": "theo-4", "category": "🟠 Theorie", "exam": "CorpSus Mitschrift", "front": "Was sind die vier Motive des strategischen Nachhaltigkeitsmanagements? (Merkwort: RKGW)", "back": "**R**isiken reduzieren\n**K**osten/Effizienz\n**G**esetz und Legitimität\n**W**achstum/Differenzierung\n\n⚠️ „Bestehende Motive nennen + eigene Motive ergänzen!\" (Dozent)\n→ Eigene: Resilienz Lieferkette, First-Mover-Vorteil, Talent-Attraction"}, {"id": "reg-2", "category": "🟠 Regulatorik", "exam": "Alle Klausuren", "front": "Wann ist eine Tätigkeit EU-taxonomiekonform? (Worthaut: „1 hilft – 5 bleiben heil – Menschen geschützt\")", "back": "1. **Wesentlicher Beitrag** zu ≥1 Umweltziel\n2. **DNSH** — keine erhebliche Beeinträchtigung der anderen 5 Ziele\n3. **Minimum Safeguards** (OECD, UNGP, ILO)\n4. Technische **Bewertungskriterien** erfüllt\n\n**KPIs:** Turnover · CapEx · OpEx\n\n**Merksatz:** „Umsatz = heutiger grüner Anteil; CapEx = wohin entwickelt sich das Unternehmen.\"\n\n6 Umweltziele: **KAWKUB** = Klimaschutz · Anpassung · Wasser · Kreislauf · Umweltverschmutzung · Biodiversität"}, {"id": "calc-1", "category": "🟠 Kleine Rechenaufgaben", "exam": "SuSFi Übung 1+3", "front": "Berechnen Sie den Break-even-Point. Gegeben: Fixkosten 50.000€, Preis 120€/Stk, variable Kosten 70€/Stk.", "back": "x* = Fixkosten / (Preis − variable Kosten)\n= 50.000 / (120 − 70)\n= 50.000 / 50\n= **1.000 Stück**\n\n**LCA-Variante:** Höhere Herstellungswirkung / eingesparte Wirkung pro Nutzung (= Break-even in Nutzungen oder km)."}, {"id": "calc-2", "category": "🟠 Kleine Rechenaufgaben", "exam": "CorpSus Übungen", "front": "Berechnen Sie den Corporate Carbon Footprint. Gegeben: Stromverbrauch 500.000 kWh, Emissionsfaktor 420 g CO₂/kWh (location-based), 0 g/kWh (market-based, Ökostrom). Scope 1: 50 t, Scope 3: 200 t.", "back": "**Emissionen = Aktivitätsdaten × Emissionsfaktor**\n\nScope 2 location-based: 500.000 × 0,420 = **210 t CO₂e**\nScope 2 market-based: 500.000 × 0 = **0 t CO₂e**\n\nGesamt (location): 50 + 210 + 200 = **460 t CO₂e**\nGesamt (market): 50 + 0 + 200 = **250 t CO₂e**\n\n⚠️ Scope 2: location-based = Strommix; market-based = Vertrag/Beschaffung"}, {"id": "calc-3", "category": "🟠 Kleine Rechenaufgaben", "exam": "CorpSus Übungen", "front": "Erklären Sie das Prinzip der Materialflusskostenrechnung (MFCA) in einem Satz.", "back": "„Abfall kostet nicht nur Entsorgung — er enthält bereits bezahlte Material-, Energie- und Systemkosten.\"\n\nDas ist die gesamte Idee der MFCA: Verluste sichtbar machen, die sonst in Gemeinkosten untergehen."}, {"id": "taktik-1", "category": "⚪ Klausurtaktik", "exam": "Alle Klausuren (90 Min, 70% der Note)", "front": "Sie haben 90 Minuten für die NAMA-Klausur. Was ist die optimale Bearbeitungsreihenfolge?", "back": "**Reihenfolge:**\n1. Große Rechenaufgabe (40P) — max. 40 Min\n2. Kleine Rechenaufgabe (10-15P) — max. 15 Min\n3. Essay (25P) — max. 25 Min\n4. Theorie — Restzeit\n\n**Regel:** Punkte = Minuten. Nach Zeitlimit ABBRECHEN.\n\n**Trick:** Rechenweg IMMER hinschreiben (Methodenpunkte!), Annahmen dokumentieren, nie ein Feld leer lassen. Standard-Schlusssatz: „Die Aussagekraft hängt von Parametern ab; Sensitivitätsanalyse erforderlich.\""}, {"id": "essay-3", "category": "🔴 Essay", "exam": "Optimal: ROADS + 6 Absätze + Satz=1P-Denken", "front": "OPTIMALE ESSAY-TAKTIK: Wie kombiniere ich ROADS, die 6-Absatz-Struktur und das Satz-Punkte-Denken?", "back": "1. **NICHT** blind 25 Sätze einer Vorlage abschreiben — das passt nicht zum Artikelthema!\n\n2. **Stattdessen:** 6 Absätze à 3-5 Sätze (Crash-Plan-Struktur):\n   1) Einstieg+These — Artikelbezug, Paris 2015\n   2) Begriffsklärung — 2-3 Kernbegriffe\n   3) Regulatorische Kette — Taxonomie→CSRD/ESRS→Omnibus\n   4) Drei Ebenen — Organisation, Systeme, Strategie\n   5) Chancen+Herausforderungen\n   6) Fazit mit eigener Position\n\n3. **ROADS als Checkliste:** Jeder Absatz muss mindestens 1 ROADS-Element enthalten\n\n4. **Satz=1P-Denken:** Keine Schachtelsätze, Fakten statt Blabla"}, {"id": "joker-1", "category": "🔴 Joker-Zahlen", "exam": "Alle Essays — hebt dich sofort über Durchschnitt", "front": "Nennen Sie KONKRETE Zahlen zu den vier Praxisbeispielen (BASF, DB, GLS, Lammsbräu).", "back": "**BASF** — Stakeholder Advisory Council: **34 Interviews**, **>240 IROs** bewertet, Value-to-Society\n\n**Deutsche Bank** — Transition Plan 2025 (Netto-Null 2050):\n- Scope 1: **−66%**, Scope 2: **−84%** seit 2019\n- Scope 3.15: **34,2 Mt CO₂e** nach PCAF (93% Firmenkundenkredite)\n- **8 Sektorpfade** nach IEA NZE\n- Vorstandsvergütung an CO₂-Pfade gekoppelt\n\n**GLS Bank** — integrierte Geschäfts-, Risiko- & NH-Strategie in EINER Steuerung\n\n**Neumarkter Lammsbräu** — 100% Öko-Landbau, regionale Dialoge, enkeltauglich"}, {"id": "essay-4", "category": "🔴 Essay", "exam": "Crash-Plan + Survival Pack Synthese", "front": "Wann nutze ich welches Essay-Framework? ROADS vs. 6-Absätze vs. nummerierte Sätze?", "back": "⚠️ **NICHT:** Die Survival-Pack-Vorlage (Sätze 1-25) wortwörtlich abschreiben — Artikelthema passt nie 1:1.\n\n✅ **SO:**\n- **ROADS** = Inhaltliche Checkliste (HABE ich alle 5 Perspektiven?)\n- **6-Absatz-Struktur** (Crash-Plan) = Organisation (schreibe ich in der richtigen Reihenfolge?)\n- **Satz-Punkte-Denken** (Survival Pack) = Taktik (jeder Satz muss eine verifizierbare Fachinfo enthalten)\n\n**Merksatz:** ROADS sagt WAS, 6 Absätze sagen WO, Satz-Punkte-Denken sagt WIE."}, {"id": "theo-5", "category": "🟠 Theorie", "exam": "Survival Pack / Crash-Plan", "front": "Was sind die 4 Leitthemen der operativen NH-Umsetzung? Und der Fahrplan der Integration?", "back": "**4 Leitthemen** (kommen aus dem Skript, stehen in Survival Pack + Crash-Plan):\n1. **Daten** — einheitliche, vollständige Erfassung\n2. **Systeme/Prozesse** — validiert, formalisiert, standardisierte IT\n3. **Kontrollen** — IKS analog zum finanziellen IKS, Interne Revision\n4. **Integration** — Verknüpfung finanzieller + nichtfinanzieller Infos\n\n**Fahrplan:** Minimum Compliance → Effizienz → Differenzierung → disruptiver Veränderungsfaktor\n\n⚠️ Beides beantwortet: „Wie enabled?“ + „Was überwacht der Aufsichtsrat?“"}, {"id": "theo-6", "category": "🟠 Theorie", "exam": "Survival Pack / DCGK", "front": "Welche Rolle spielt der DCGK im Nachhaltigkeitsmanagement? (Worthaut Survival Pack: Satz 12)", "back": "**DCGK = Deutscher Corporate Governance Kodex**\n- §161 AktG, „soft law“ (weder zwingendes noch dispositives Recht)\n- „Soll“ = Empfehlung, „Sollte“ = Anregung\n- Empfiehlt Verankerung von ESG-Kriterien in Führungsprozessen und Aufsichtsratspflichten\n- Leitbild des Ehrbaren Kaufmanns\n\n**Essay-Satz:** „Der DCGK empfiehlt die Verankerung von ESG-Kriterien in Führungsprozessen und Aufsichtsratspflichten — Governance wird ernst, wenn sie vergütungswirksam wird.“"}, {"id": "theo-7", "category": "🟠 Theorie", "exam": "ULTIMATE Cheat Sheet – Maschine 4", "front": "Beschreiben Sie die vollständige Managementkette des Nachhaltigkeitsmanagements. Von der Wesentlichkeit bis zur Verbesserung.", "back": "**Die 9-stufige Managementkette:**\n\nWesentliches Thema\n→ **Strategie** — Was wollen wir erreichen?\n→ **Messbares Ziel** — Woran messen wir Erfolg?\n→ **Maßnahme + Verantwortliche + Ressourcen** — Wer macht was womit?\n→ **KPI** — Welche Kennzahl zeigt Fortschritt?\n→ **Daten und IT** — Wie erfassen wir verlässlich?\n→ **IKS** — Internes Kontrollsystem (analog Finanz-IKS)\n→ **Reporting** — Wer bekommt welche Information?\n→ **Abweichung analysieren** — Wo stehen wir vs. Ziel?\n→ **Maßnahme anpassen** — Was ändern wir?\n\n**Das beantwortet gleichzeitig:**\n• Wie wird die Organisation „enabled\"?\n• Wie wird Nachhaltigkeit steuerbar?\n• Warum braucht man ein IKS?\n• Was überwachen Vorstand und Aufsichtsrat?"}, {"id": "calc-4", "category": "🟠 Kleine Rechenaufgaben", "exam": "CorpSus Übungen", "front": "Berechnen Sie die Kosten des Hauptprodukts nach der Restwertmethode (Kuppelproduktion). Gegeben: Gesamtkosten 500.000€, Nebenprodukt-Erlöse 80.000€, Menge Hauptprodukt 10.000 Stück.", "back": "**Restwertmethode:**\n\nKosten Hauptprodukt = (Gesamtkosten − Erlösüberschüsse Nebenprodukte) / Menge Hauptprodukt\n\n= (500.000 − 80.000) / 10.000\n= 420.000 / 10.000\n= **42,00 € pro Stück**\n\n**Logik:** Die Nebenprodukte „subventionieren\" das Hauptprodukt — ihre Erlöse mindern die zurechenbaren Kosten. Nur die Restkosten trägt das Hauptprodukt."}, {"id": "hp-basics", "category": "🔥 High Priority", "exam": "CorpSus Folien 8, 12–14", "front": "Wie hängen ESG, die SDGs und das Pariser Abkommen 2015 in einer Klausurantwort zusammen?", "back": "**ESG** ist die Unternehmensperspektive: Umwelt, Soziales, Governance werden gesteuert und berichtet.\n\n**SDGs** sind die 17 globalen Entwicklungsziele der UN bis 2030; sie geben den gesellschaftlichen Orientierungsrahmen.\n\nDas **Pariser Abkommen (2015)** setzt den klimapolitischen Rahmen: Erwärmung deutlich unter 2 °C halten und Anstrengungen für 1,5 °C.\n\n**Klausurbrücke:** Unternehmen übersetzen globale Ziele in ESG-Strategie, messbare Ziele, Maßnahmen und KPIs."}, {"id": "hp-strategy", "category": "🔥 High Priority", "exam": "CorpSus Folien 18–41", "front": "Wie wird Nachhaltigkeit strategisch gesteuert – vom Stakeholder Engagement bis zur Kontrolle?", "back": "1. **Stakeholder einbeziehen** und wesentliche Themen/IROs bestimmen.\n2. **Strategie und langfristige Ziele** an Geschäfts- und Risikostrategie koppeln.\n3. **KPIs, Zwischenziele, Verantwortliche und Maßnahmen** festlegen.\n4. **Daten, Prozesse und IKS** aufbauen; finanzielle und nichtfinanzielle Informationen integrieren.\n5. **Reporting, Soll-Ist-Vergleich und Nachsteuerung** durchführen.\n\n**GLS-Beispiel:** Geschäfts-, Risiko- und Nachhaltigkeitsstrategie laufen in einer integrierten Steuerung zusammen."}, {"id": "hp-reg-kpi", "category": "🔥 High Priority", "exam": "CorpSus Folien 48–69, 149–165", "front": "Welche Regulatorik- und Steuerungspunkte sind für die CorpSus-Kernfolien klausurreif?", "back": "**CSRD/ESRS:** EU-Berichterstattung mit doppelter Wesentlichkeit. **IFRS S1/S2:** investorenorientierte finanzielle Wesentlichkeit sowie Klima. Das **Omnibus-Verfahren** soll den Anwendungsbereich vereinfachen; der **DCGK** verankert ESG in Führung und Aufsicht.\n\n**EU-Taxonomie:** ökologisch nachhaltig nur bei wesentlichem Beitrag, DNSH, Minimum Safeguards und technischen Kriterien.\n\n**Taxonomie-KPIs:** **Turnover** = heutiger grüner Umsatzanteil; **CapEx** = Transformationsinvestitionen; **OpEx** = taxonomiefähige operative Aufwendungen.\n\n**Steuerung:** wenige relevante KPIs mit Ziel, Datenverantwortung, IKS, Bericht und Gegenmaßnahme bei Abweichung."}, {"id": "hp-risk", "category": "🔥 High Priority", "exam": "SuSFi Kapitel 3 Folien 4, 7, 8, 16, 18, 26, 56", "front": "Wie wirken Transition-, physische und Biodiversitätsrisiken auf die Risikotragfähigkeit einer Bank?", "back": "ESG ist **kein separates Risiko**, sondern ein Treiber bestehender Risikoarten.\n\n- **Transition:** CO₂-Preis, Regulierung oder neue Technologie drücken Cashflows → PD steigt.\n- **Physisch:** Extremwetter beschädigt Sicherheiten/Produktion → LGD steigt.\n- **Biodiversität:** Verlust von Ökosystemleistungen und neue Naturschutzvorgaben erzeugen physische, Transition- und systemische Risiken.\n\nFür die **Risikotragfähigkeit/ICAAP** werden die Effekte über Szenarien, PD-/LGD-Anpassungen oder proportionale ESG-Add-ons in Kapitalplanung, Limits und Stresstests integriert."}, {"id": "hp-instruments", "category": "🔥 High Priority", "exam": "SuSFi Folie 184 / Instrumente", "front": "Vergleichen Sie DB Transition Plan 2025, Green Bonds und Sustainability-Linked Loans (SLL).", "back": "**DB Transition Plan 2025:** Netto-Null-Management mit transparenten Zwischenzielen 2030; umfasst eigene Emissionen (Scope 1/2), Wertschöpfungskette (Scope 3.1–14) und finanzierte Emissionen. Hebel: Governance, Risikomanagement, Kundenengagement und sektorale Dekarbonisierungspfade.\n\n**Green Bond:** zweckgebundenes Kapital für grüne Projekte; Orientierung an den **ICMA Green Bond Principles** (Use of Proceeds, Prozess, Mittelverwaltung, Reporting).\n\n**SLL:** Mittelverwendung frei, aber die Kreditmarge folgt ESG-KPIs/SPTs; ein **Margin Ratchet** erhöht oder senkt den Zins bei Zielverfehlung bzw. -erreichung."}];
 
 const CRASH_COURSE_STEPS = [{"number":1,"title":"Integrated Value","time":"60 Min. · Kernaufgabe","task":"Rechne die IV-Blaupause einmal vollständig selbst: Finanzwert, Umweltwert und Interpretation.","originalTask":"/crash-assets/01-integrated-value-task.webp","officialSolution":"/crash-assets/01-integrated-value-solution.webp","shortAnswer":"EBIT = EBITDA − AfA; s = 29,825 %; FCF = EBIT × 0,70175. FV = ΣPV(FCF) + PV(TV) − FK; EV = −ΣPV(CO₂ × Schattenpreis) bei 2 %; IV = FV + EV. TV liegt eine Periode vor der ersten ewigen Zahlung.","sourceNote":"Original: SuSFi Übung 1, Aufgabe 7. Offizielle Lösung: SuSFi Übung 1, Lösungsseiten 18–19."},{"number":2,"title":"Taxonomie-KPIs","time":"45 Min. · sichere Punkte","task":"Trenne taxonomiefähig von taxonomiekonform und berechne Umsatz-, CapEx- und OpEx-KPI.","originalTask":"/crash-assets/02-taxonomie-kpis-task.webp","officialSolution":"/crash-assets/02-taxonomie-kpis-solution.webp","shortAnswer":"Taxonomiekonform ist nur, was wesentlich beiträgt UND DNSH UND Minimum Safeguards erfüllt. KPI = konformer Zähler / Gesamtnenner. Beim CapEx-Plan gehört qualifizierter Plan-CapEx in den Nenner; erst dann sauber neu rechnen.","sourceNote":"Original: CorpSus Übung 3, Aufgabe 16. Offizielle Lösung: CorpSus Übung 3, Lösungsseiten 13–15."},{"number":3,"title":"ISSB vs. ESRS","time":"45 Min. · 10-Punkte-Block","task":"Löse die doppelte Wesentlichkeit als Originalfall und verknüpfe sie mit der Prüfungs-Tabelle ISSB versus ESRS.","originalTask":"/crash-assets/03-wesentlichkeit-task.webp","officialSolution":"/crash-assets/03-wesentlichkeit-solution.webp","shortAnswer":"ESRS: doppelte Wesentlichkeit = Impact UND finanzielle Wesentlichkeit. IFRS S1/S2: finanzielle Wesentlichkeit. Beide strukturieren über Governance, Strategie, Risikomanagement sowie Metriken & Ziele. Bei ESRS genügt eine wesentliche Dimension für Berichtspflicht.","sourceNote":"Original: CorpSus Übung 2, Aufgabe 8. Offizielle Lösung: CorpSus Ergänzungen, Lösungsseiten 6–10."},{"number":4,"title":"Essay-Maschine","time":"35 Min. · Antwortgerüst","task":"Nimm die Implementierungsaufgabe als Blaupause für jede offene CorpSus-Frage.","originalTask":"/crash-assets/04-essay-task.webp","officialSolution":"/crash-assets/04-essay-solution.webp","shortAnswer":"Definition → Relevanz → Regulatorik (Paris → Green Deal → EU-Aktionsplan → Taxonomie/CSRD/Omnibus) → Organisation, Systeme, Strategie → je zwei Chancen und Hürden → klare eigene Position. Immer am Unternehmen anwenden, nicht nur Schlagworte aufzählen.","sourceNote":"Original: CorpSus Übung 1, Aufgabe 4. Offizielle Lösung: CorpSus Übung 1, Lösungsseiten 10–11."},{"number":5,"title":"WACC/CAPM + kleine SuSFi-Bausteine","time":"45 Min. · Rechen-Sicherheit","task":"Berechne WACC von Grund auf und sage danach in einem Satz, was jeder Baustein ökonomisch bedeutet.","originalTask":"/crash-assets/05-wacc-capm-task.webp","officialSolution":"/crash-assets/05-wacc-capm-solution.webp","shortAnswer":"βv = βu × [1 + (1 − s) × FK/EK]; rEK = rf + βv × Marktrisikoprämie; WACC = rEK × EK/GK + (1 − s) × rFK × FK/GK. Danach Barwerte immer mit dem zugehörigen Zeitpunkt diskontieren, Einheiten sichtbar halten.","sourceNote":"Original: SuSFi Übung 1, Aufgabe 6. Offizielle Lösung: SuSFi Übung 1, Lösungsseiten 13–15."},{"number":6,"title":"Produktrechnung","time":"40 Min. · CorpSus-Rechnen","task":"Rechne eine Produkt-CO₂-Bilanz und leite aus dem Ergebnis den Break-even ab.","originalTask":"/crash-assets/06-produktrechnung-task.webp","officialSolution":"/crash-assets/06-produktrechnung-solution.webp","shortAnswer":"Zuerst funktionale Einheit festlegen, dann alle Lebenszyklus-Module addieren. Beim Mehrweg: Fixemissionen durch Umläufe teilen und variable Emissionen addieren. Break-even dort, wo PCF Mehrweg = PCF Einweg; Ergebnis immer als ganze Mindest-Umlaufzahl formulieren.","sourceNote":"Original: CorpSus Übung 3, Aufgabe 14. Offizielle Lösung: CorpSus Übung 3, Lösungsseiten 4–5."},{"number":7,"title":"Kapitel 4 & Theorie","time":"35 Min. · saubere Textpunkte","task":"Übe Stakeholder und Engagement als Antwort, die gleichzeitig Organisation und Umsetzung erklärt.","originalTask":"/crash-assets/07-kapitel4-theorie-task.webp","officialSolution":"/crash-assets/07-kapitel4-theorie-solution.webp","shortAnswer":"Nenne Stakeholder + konkretes Interesse + Einfluss: Kunden, Mitarbeitende, Kapitalgeber, NGOs, Lieferanten. Engagement heißt relevante Gruppen zielgerichtet und kontinuierlich einbeziehen: identifizieren → priorisieren → informieren/dialogisieren → auswerten → zurückspiegeln.","sourceNote":"Original: CorpSus Übung 1, Aufgaben 5–6. Offizielle Lösung: CorpSus Übung 1, Lösungsseiten 13–16."},{"number":8,"title":"Reserve-Rechnen","time":"35 Min. · Green Bond","task":"Bewerte den Green Bond zuerst ohne und dann mit Greenium; erkläre den Preisunterschied in einem Satz.","originalTask":"/crash-assets/08-reserve-rechnen-task.webp","officialSolution":"/crash-assets/08-reserve-rechnen-solution.webp","shortAnswer":"P = Σ CFt/(1+y)^t. Sinkt die geforderte Rendite durch Greenium, steigt der Kurs. Hier: ohne Green-Label ca. 99,12 je 100 Nominal; als Green Bond bei YTM = Kupon genau 100. Emittentenvorteil = Mehrerlös minus glaubhafte GBP-Kosten.","sourceNote":"Original: SuSFi Übung 3, Aufgabe 12. Offizielle Lösung: SuSFi Übung 3, Lösungsseiten 15–17."}];
+
+const ESSAY_EXAMS = [
+  {
+    id: 'ss25-pt1-omnibus',
+    title: 'Omnibus & Deregulierung',
+    exam: 'SoSe 2025 · 1. Prüfungstermin · Aufgabe 1 · 25 Punkte',
+    memory: 'DATEN BLEIBEN → FREIRAUM NUTZEN → NICHT VERNACHLÄSSIGEN',
+    prompt: 'Mittelständisches Unternehmen mit 500 Mitarbeitenden und 40 Mio. € Umsatz: Reflektieren Sie den Einfluss des Omnibuspakets auf (a) Datenerhebung und -steuerung, (b) Chancen und Risiken der ESG-Integration einschließlich CSDDD-Verschiebung auf 2028 und (c) Stärkung versus Vernachlässigung von CO₂-Berichterstattung und Lieferkettensorgfalt.',
+    blocks: [
+      {
+        title: 'A · Datenerhebung und -steuerung',
+        hint: '8 Punkte: Was wird einfacher – und was muss trotzdem bleiben?',
+        sentences: [
+          ['B', 'Das Omnibuspaket soll Umfang und Komplexität verpflichtender Nachhaltigkeitsangaben reduzieren.'],
+          ['A', 'Für das mittelständische Unternehmen können dadurch weniger Datenpunkte und Berichtsschnittstellen erforderlich werden.'],
+          ['K', 'Der geringere Pflichtumfang kann Personal-, Prüfungs- und IT-Kosten senken.'],
+          ['I', 'Vereinfachte Vorgaben können parallele Datenerfassungen und Doppelarbeiten zwischen Fachbereichen vermeiden.'],
+          ['I', 'Das Unternehmen sollte seine ESG-Datenprozesse dennoch nicht vollständig abbauen.'],
+          ['S', 'Kunden, Banken und größere Geschäftspartner können weiterhin freiwillige ESG-Daten verlangen.'],
+          ['I', 'Einheitliche Definitionen, klare Datenverantwortliche und standardisierte IT-Systeme bleiben deshalb notwendig.'],
+          ['K', 'Ein Nachhaltigkeits-IKS erhöht auch bei geringeren Berichtspflichten die Verlässlichkeit und Steuerbarkeit der Daten.']
+        ]
+      },
+      {
+        title: 'B · Chancen und Risiken der ESG-Integration',
+        hint: '8 Punkte: Was gewinnt das Geschäftsmodell – und was droht durch den Aufschub?',
+        sentences: [
+          ['A', 'Die Entlastung eröffnet die Chance, Ressourcen vom formalen Reporting in wirksame Nachhaltigkeitsmaßnahmen umzulenken.'],
+          ['S', 'Eine Wesentlichkeitsanalyse kann die knappen Ressourcen auf die wichtigsten ESG-Themen des Geschäftsmodells konzentrieren.'],
+          ['S', 'Energie- und Materialeffizienz können Kosten senken und zugleich die Umweltleistung verbessern.'],
+          ['S', 'Glaubwürdige ESG-Steuerung kann Finanzierung, Kundenzugang und Wettbewerbsdifferenzierung unterstützen.'],
+          ['I', 'Die Verschiebung der CSDDD-Anwendung auf 2028 schafft zusätzliche Zeit für Risikoanalysen und Lieferantenprozesse.'],
+          ['K', 'Der Aufschub kann jedoch den internen Handlungsdruck zur ESG-Integration verringern.'],
+          ['K', 'Unterbrochene Datenreihen erschweren Soll-Ist-Vergleiche, Zielkontrolle und strategische Entscheidungen.'],
+          ['K', 'Eine vertagte Lieferkettensorgfalt kann menschenrechtliche und ökologische Risiken länger unentdeckt lassen.']
+        ]
+      },
+      {
+        title: 'C · Kritische Gesamtbewertung',
+        hint: '8 Punkte: Warum verschwindet das Problem nicht mit der Pflicht?',
+        sentences: [
+          ['K', 'Geringere Berichtspflichten beseitigen weder physische noch transitorische Nachhaltigkeitsrisiken.'],
+          ['K', 'Auch die Erwartungen von Kapitalgebern, Kunden, Mitarbeitenden und NGOs bestehen unabhängig vom Gesetz fort.'],
+          ['K', 'Eine schwächere CO₂-Berichterstattung kann Emissionen und Zielabweichungen weniger transparent machen.'],
+          ['K', 'Reduzierte Lieferkettendaten können negative Auswirkungen bei Zulieferern verdecken.'],
+          ['K', 'Sinkende Vergleichbarkeit erhöht das Risiko von Greenwashing und erschwert Stakeholderentscheidungen.'],
+          ['A', 'Die Entlastung stärkt Nachhaltigkeit nur, wenn eingesparte Ressourcen in tatsächliche Verbesserungen fließen.'],
+          ['I', 'Dafür sollte das Unternehmen freiwillig Wesentlichkeitsanalyse, Ziele, KPIs, Datenprozesse und Kontrollen fortführen.'],
+          ['I', 'Vorstand und Aufsichtsrat sollten ESG-Verantwortung trotz geringerer Regulierung in Steuerung und Überwachung verankern.']
+        ]
+      }
+    ],
+    verdict: ['K', 'Das Omnibuspaket ist daher eine sinnvolle administrative Entlastung, aber nur eine starke Nachhaltigkeitslösung, wenn das Unternehmen seine materielle ESG-Steuerung freiwillig beibehält.'],
+    source: 'Aufgabenwortlaut: Altklausur SoSe 2025 PT1. Fachbasis: CorpSus-Skript zu Daten, Systemen, IKS, Strategie und Governance sowie die Übungslösungen. Für den Essay existiert kein offizieller Erwartungshorizont; dies ist eine quellenbasierte Musterlösung.'
+  },
+  {
+    id: 'ss25-pt2-double-materiality',
+    title: 'Doppelte Wesentlichkeit & CSRD',
+    exam: 'SoSe 2025 · 2. Prüfungstermin · Aufgabe 1 · 25 Punkte',
+    memory: 'ZWEI BLICKE → STEUERN → STRATEGIE + RISIKO + ORGANISATION',
+    prompt: 'Schreiben Sie ein Essay zur Doppelten Wesentlichkeit im Kontext der CSRD: (a) Begriff und zentrale Bedeutung für die CSRD, (b) Implikationen für nachhaltiges Management und (c) Integration in Unternehmensstrategie, Risikomanagement und organisatorische Umsetzung.',
+    blocks: [
+      {
+        title: 'A · Begriff und Bedeutung für die CSRD',
+        hint: '8 Punkte: Zwei Perspektiven, Oder-Logik, IRO und Berichtsinhalt.',
+        sentences: [
+          ['B', 'Die CSRD konkretisiert die Nachhaltigkeitsberichterstattung durch die European Sustainability Reporting Standards.'],
+          ['B', 'Die Impact-Wesentlichkeit untersucht als Inside-out-Perspektive die Auswirkungen des Unternehmens auf Umwelt und Menschen.'],
+          ['B', 'Die finanzielle Wesentlichkeit untersucht als Outside-in-Perspektive Nachhaltigkeitsrisiken und -chancen für das Unternehmen.'],
+          ['B', 'Die Impact-Perspektive umfasst positive und negative sowie tatsächliche und potenzielle Auswirkungen.'],
+          ['B', 'Beide Perspektiven beziehen den eigenen Geschäftsbereich sowie die vor- und nachgelagerte Wertschöpfungskette ein.'],
+          ['B', 'Ein Nachhaltigkeitsthema ist wesentlich, wenn mindestens eine der beiden Perspektiven erfüllt ist.'],
+          ['I', 'Das IRO-Assessment identifiziert und bewertet hierfür Impacts, Risks und Opportunities.'],
+          ['K', 'Das Ergebnis der Wesentlichkeitsanalyse bestimmt die berichtspflichtigen Themen und erweitert die reine Investorensicht des ISSB.']
+        ]
+      },
+      {
+        title: 'B · Implikationen für nachhaltiges Management',
+        hint: '8 Punkte: Von Berichtspflicht zu Prioritäten, Zielen und Steuerung.',
+        sentences: [
+          ['A', 'Die doppelte Wesentlichkeit ist nicht nur eine Berichtspflicht, sondern eine Grundlage unternehmerischer Steuerung.'],
+          ['A', 'Stakeholder-Engagement hilft, relevante Auswirkungen und Erwartungen systematisch zu identifizieren.'],
+          ['S', 'Die Ergebnisse priorisieren Nachhaltigkeitsthemen und lenken Ressourcen auf wesentliche Handlungsfelder.'],
+          ['I', 'Für wesentliche Themen sind messbare Ziele, Maßnahmen, Verantwortliche und KPIs festzulegen.'],
+          ['I', 'Finanzielle und nichtfinanzielle Informationen müssen für Entscheidungen miteinander verknüpft werden.'],
+          ['S', 'Die Analyse kann Chancen für Produkte, Prozesse, Märkte und Differenzierung sichtbar machen.'],
+          ['S', 'Sie macht zugleich physische, transitorische, soziale, Reputations- und Lieferkettenrisiken erkennbar.'],
+          ['K', 'Valide Daten und regelmäßige Zielkontrollen begrenzen Fehlsteuerung und Greenwashing.']
+        ]
+      },
+      {
+        title: 'C · Strategie, Risiko und Organisation',
+        hint: '8 Punkte: Wer macht was, womit und wie wird kontrolliert?',
+        sentences: [
+          ['S', 'Wesentliche Nachhaltigkeitsthemen müssen in Geschäfts- und Nachhaltigkeitsstrategie integriert werden.'],
+          ['S', 'Das Risikomanagement muss ESG-Risiken identifizieren, bewerten, steuern und durch Szenarien überwachen.'],
+          ['I', 'Der Vorstand trägt die Gesamtverantwortung und setzt durch den Tone at the Top klare Prioritäten.'],
+          ['I', 'Nachhaltigkeit, Controlling, Risikomanagement, Einkauf, Personal und operative Bereiche benötigen klare Zuständigkeiten.'],
+          ['I', 'Standardisierte IT-Systeme müssen ESG-Daten auch entlang der Wertschöpfungskette konsolidieren.'],
+          ['I', 'Ein Nachhaltigkeits-IKS sichert Definitionen, Datenverantwortung, Nachweise und Freigaben.'],
+          ['I', 'Der Aufsichtsrat überwacht die Umsetzung, während die Interne Revision Prozesse und Kontrollen unabhängig prüft.'],
+          ['K', 'Die Wesentlichkeitsanalyse ist regelmäßig zu aktualisieren, wenn sich Geschäftsmodell, Stakeholder oder Risiken verändern.']
+        ]
+      }
+    ],
+    verdict: ['K', 'Doppelte Wesentlichkeit verbindet somit gesellschaftliche Verantwortung mit finanzieller Resilienz und wird erst durch Strategie, Risikomanagement und klare Organisation zu wirksamem Nachhaltigkeitsmanagement.'],
+    source: 'Aufgabenwortlaut: Altklausur SoSe 2025 PT2. Fachbasis: CorpSus-Skript und Übungslösung zum IRO-Assessment, zur doppelten Wesentlichkeit sowie zu Daten, IKS und Governance. Für den Essay existiert kein offizieller Erwartungshorizont; dies ist eine quellenbasierte Musterlösung.'
+  }
+];
 
 const NOTE_CARDS_STORAGE_KEY = 'nama-note-cards-v1';
 const OWN_NOTES_CATEGORY = '📌 Eigene Notizen';
@@ -588,12 +793,114 @@ function renderCrashCourse() {
   </article>`).join('')}`;
 }
 
+function renderEssayCourse() {
+  const target = document.getElementById('essayCourse');
+  const exams = ESSAY_EXAMS.map(exam => {
+    const blocks = exam.blocks.map((block, blockIndex) => `
+      <section class="essay-block">
+        <h4>${escapeHtml(block.title)}</h4>
+        <p class="essay-block-hint">${escapeHtml(block.hint)}</p>
+        <ol class="essay-sentences" style="--start:${blockIndex * 8}">
+          ${block.sentences.map(([lens, sentence]) => `<li><span class="basik-chip" title="BASIK-Lernanker">${escapeHtml(lens)}</span><span>${escapeHtml(sentence)}</span></li>`).join('')}
+        </ol>
+      </section>`).join('');
+    return `<details class="essay-exam" id="${escapeHtml(exam.id)}">
+      <summary>
+        <span class="essay-exam-title">${escapeHtml(exam.title)}</span>
+        <span class="essay-exam-meta">${escapeHtml(exam.exam)}</span>
+      </summary>
+      <div class="essay-exam-body">
+        <div class="essay-prompt"><strong>Originalauftrag, maximal kompakt:</strong><br>${escapeHtml(exam.prompt)}</div>
+        <div class="essay-memory"><strong>3-Block-Merker:</strong> ${escapeHtml(exam.memory)}</div>
+        ${blocks}
+        <div class="essay-verdict"><span class="point-number">25</span><span class="basik-chip">${escapeHtml(exam.verdict[0])}</span><span>${escapeHtml(exam.verdict[1])}</span></div>
+        <p class="essay-source"><strong>Quellenstatus:</strong> ${escapeHtml(exam.source)}</p>
+      </div>
+    </details>`;
+  }).join('');
+
+  target.innerHTML = `
+    <section class="essay-hero">
+      <div class="essay-eyebrow">20 Minuten · Null Vorwissen · 25 Punkte</div>
+      <h2>Der Essay ist kein Essay.</h2>
+      <p>Er ist drei getrennte Antworten. Kopiere die drei Arbeitsaufträge als Überschriften, schreibe unter jeden acht neue Informationen und ende mit einem klaren Urteil.</p>
+      <div class="essay-rule">3 × 8 + 1 · ein Satz = eine neue Information</div>
+      <div class="essay-timer-row">
+        <div class="essay-timer" id="essayTimer" aria-live="polite">20:00</div>
+        <button class="essay-timer-btn" type="button" onclick="toggleEssayTimer()" id="essayTimerButton">▶ 20 Min starten</button>
+      </div>
+    </section>
+
+    <div class="essay-plan" aria-label="20-Minuten-Lernplan">
+      <div><strong>0–4 Min.</strong>BASIK + 3×8+1 laut aufsagen.</div>
+      <div><strong>4–11 Min.</strong>Omnibus: drei Block-Merker lernen.</div>
+      <div><strong>11–18 Min.</strong>Wesentlichkeit: drei Block-Merker lernen.</div>
+      <div><strong>18–20 Min.</strong>Je acht Stichwörter ohne Hinsehen.</div>
+    </div>
+
+    <section class="basik-card">
+      <h3>BASIK = Notfall-Fragengenerator</h3>
+      <p>Nicht als fünf feste Absätze schreiben. Wenn dir in einem verlangten Block Informationen fehlen, frage BASIK durch:</p>
+      <div class="basik-grid">
+        <div class="basik-item"><b>B</b>Begriff: Was bedeutet es?</div>
+        <div class="basik-item"><b>A</b>Anwendung: Was heißt es im Fall?</div>
+        <div class="basik-item"><b>S</b>Strategie: Chance, Risiko, Geschäftsmodell?</div>
+        <div class="basik-item"><b>I</b>Implementierung: Wer, Prozess, Daten, KPI?</div>
+        <div class="basik-item"><b>K</b>Kritik/Konsequenz: Grenze und Urteil?</div>
+      </div>
+    </section>
+
+    <section class="essay-warning">
+      <h3>Was du wirklich auswendig lernst</h3>
+      <p><strong>Nicht 50 Sätze Wort für Wort.</strong> Lerne je Klausur die drei grünen Block-Merker und pro Block acht Stichwörter. Die Sätze unten sind deine ausformulierte Sicherheitslösung. In den vier Altklausuren gibt es genau diese zwei echten 25-Punkte-Essays; die Aufgaben von 2024 waren kürzere Theoriefragen.</p>
+    </section>
+
+    ${exams}`;
+}
+
+let essayTimerSeconds = 20 * 60;
+let essayTimerInterval = null;
+
+function updateEssayTimer() {
+  const timer = document.getElementById('essayTimer');
+  if (!timer) return;
+  const minutes = Math.floor(essayTimerSeconds / 60);
+  const seconds = essayTimerSeconds % 60;
+  timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  timer.style.color = essayTimerSeconds <= 120 ? 'var(--red)' : '#fff';
+}
+
+function toggleEssayTimer() {
+  const button = document.getElementById('essayTimerButton');
+  if (essayTimerInterval) {
+    clearInterval(essayTimerInterval);
+    essayTimerInterval = null;
+    button.textContent = '▶ Weiter';
+    return;
+  }
+  if (essayTimerSeconds <= 0) essayTimerSeconds = 20 * 60;
+  button.textContent = 'Ⅱ Pause';
+  essayTimerInterval = setInterval(() => {
+    essayTimerSeconds -= 1;
+    updateEssayTimer();
+    if (essayTimerSeconds <= 0) {
+      clearInterval(essayTimerInterval);
+      essayTimerInterval = null;
+      button.textContent = '↺ Neu starten';
+    }
+  }, 1000);
+}
+
 function showMode(mode) {
-  const studyMode = mode !== 'crash';
+  const studyMode = mode === 'study';
+  const crashMode = mode === 'crash';
+  const essayMode = mode === 'essay';
   document.getElementById('studyView').hidden = !studyMode;
-  document.getElementById('crashCourse').hidden = studyMode;
+  document.getElementById('crashCourse').hidden = !crashMode;
+  document.getElementById('essayCourse').hidden = !essayMode;
   document.getElementById('studyTab').classList.toggle('active', studyMode);
-  document.getElementById('crashTab').classList.toggle('active', !studyMode);
+  document.getElementById('crashTab').classList.toggle('active', crashMode);
+  document.getElementById('essayTab').classList.toggle('active', essayMode);
 }
 
 // ── Keyboard ──
@@ -887,6 +1194,7 @@ function resetProgress() {
 
 // ── Init ──
 renderCrashCourse();
+renderEssayCourse();
 showMode('study');
 showCard();
 </script>
