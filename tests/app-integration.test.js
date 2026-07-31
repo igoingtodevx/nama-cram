@@ -82,7 +82,7 @@ function bootApp(initialStorage = {}) {
 
 test('ships an eight-step crash course with original task and solution evidence', () => {
   const html = fs.readFileSync('index.html', 'utf8');
-  const match = html.match(/const CRASH_COURSE_STEPS = (\[.*?\]);\n\nconst NOTE_CARDS_STORAGE_KEY/s);
+  const match = html.match(/const CRASH_COURSE_STEPS = (\[.*?\]);\n\nconst ESSAY_EXAMS/s);
   assert.ok(match, 'CRASH_COURSE_STEPS must be serialised in index.html');
   const steps = JSON.parse(match[1]);
 
@@ -103,6 +103,32 @@ test('ships an eight-step crash course with original task and solution evidence'
     assert.ok(step.sourceNote.length >= 20, `${step.title} needs source transparency`);
   }
   assert.doesNotMatch(JSON.stringify(steps), /LkSG|Lieferkettengesetz/i);
+});
+
+test('ships a separate BASIK essay tab with every genuine 25-point past-paper essay', () => {
+  const html = fs.readFileSync('index.html', 'utf8');
+  const match = html.match(/const ESSAY_EXAMS = (\[[\s\S]*?\]);\n\nconst NOTE_CARDS_STORAGE_KEY/);
+  assert.ok(match, 'ESSAY_EXAMS must be serialised before note-card state');
+  const exams = vm.runInNewContext(`(${match[1]})`);
+
+  assert.match(html, /id="essayTab"/);
+  assert.match(html, /id="essayCourse"/);
+  assert.equal(exams.length, 2);
+  assert.deepEqual(Array.from(exams, exam => exam.title), [
+    'Omnibus & Deregulierung',
+    'Doppelte Wesentlichkeit & CSRD',
+  ]);
+  for (const exam of exams) {
+    assert.equal(exam.blocks.length, 3, `${exam.title} needs the three requested task blocks`);
+    assert.deepEqual(Array.from(exam.blocks, block => block.sentences.length), [8, 8, 8]);
+    assert.equal(exam.verdict.length, 2);
+    assert.match(exam.source, /kein offizieller Erwartungshorizont/i);
+    const allSentences = exam.blocks.flatMap(block => block.sentences.map(item => item[1])).concat(exam.verdict[1]);
+    assert.equal(allSentences.length, 25);
+    assert.equal(new Set(allSentences).size, 25, `${exam.title} must not repeat point sentences`);
+  }
+  assert.match(html, /3 × 8 \+ 1/);
+  assert.match(html, /BASIK = Notfall-Fragengenerator/);
 });
 
 test('opening the larger tutor hides floating controls and exposes an in-panel close action', () => {
@@ -163,6 +189,21 @@ test('crash course mode switches away from flashcards without changing flashcard
   context.showMode('study');
   assert.equal(getElementById('studyView').hidden, false);
   assert.equal(getElementById('crashCourse').hidden, true);
+});
+
+test('essay mode is an independent third tab and leaves the study views hidden', () => {
+  const { context, getElementById } = bootApp();
+  context.showMode('essay');
+
+  assert.equal(getElementById('studyView').hidden, true);
+  assert.equal(getElementById('crashCourse').hidden, true);
+  assert.equal(getElementById('essayCourse').hidden, false);
+  assert.equal(getElementById('essayTab').classList.contains('active'), true);
+  assert.equal(getElementById('studyTab').classList.contains('active'), false);
+  assert.equal(getElementById('crashTab').classList.contains('active'), false);
+  assert.match(getElementById('essayCourse').innerHTML, /20 Minuten/);
+  assert.match(getElementById('essayCourse').innerHTML, /Omnibus &amp; Deregulierung/);
+  assert.match(getElementById('essayCourse').innerHTML, /Doppelte Wesentlichkeit &amp; CSRD/);
 });
 
 test('prioritises the announced lecture blocks without active LkSG learning', () => {
