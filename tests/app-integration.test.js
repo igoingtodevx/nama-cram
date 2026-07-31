@@ -105,7 +105,7 @@ test('ships an eight-step crash course with original task and solution evidence'
   assert.doesNotMatch(JSON.stringify(steps), /LkSG|Lieferkettengesetz/i);
 });
 
-test('ships a separate BASIK essay tab with every genuine 25-point past-paper essay', () => {
+test('ships a separate ROADS essay tab with every genuine 25-point past-paper essay', () => {
   const html = fs.readFileSync('index.html', 'utf8');
   const match = html.match(/const ESSAY_EXAMS = (\[[\s\S]*?\]);\n\nconst NOTE_CARDS_STORAGE_KEY/);
   assert.ok(match, 'ESSAY_EXAMS must be serialised before note-card state');
@@ -123,12 +123,18 @@ test('ships a separate BASIK essay tab with every genuine 25-point past-paper es
     assert.deepEqual(Array.from(exam.blocks, block => block.sentences.length), [8, 8, 8]);
     assert.equal(exam.verdict.length, 2);
     assert.match(exam.source, /kein offizieller Erwartungshorizont/i);
+    assert.ok(Array.isArray(exam.originalTasks) && exam.originalTasks.length >= 1);
+    for (const task of exam.originalTasks) {
+      assert.match(task, /^\/crash-assets\/roads-.+\.webp$/);
+      assert.equal(fs.existsSync(`.${task}`), true, `${exam.title} needs its original exam page`);
+    }
     const allSentences = exam.blocks.flatMap(block => block.sentences.map(item => item[1])).concat(exam.verdict[1]);
     assert.equal(allSentences.length, 25);
     assert.equal(new Set(allSentences).size, 25, `${exam.title} must not repeat point sentences`);
   }
   assert.match(html, /3 × 8 \+ 1/);
-  assert.match(html, /BASIK = Notfall-Fragengenerator/);
+  assert.match(html, /ROADS = Munition/);
+  assert.match(html, /BASIK nur bei Blackout/);
 });
 
 test('opening the larger tutor hides floating controls and exposes an in-panel close action', () => {
@@ -204,6 +210,9 @@ test('essay mode is an independent third tab and leaves the study views hidden',
   assert.match(getElementById('essayCourse').innerHTML, /20 Minuten/);
   assert.match(getElementById('essayCourse').innerHTML, /Omnibus &amp; Deregulierung/);
   assert.match(getElementById('essayCourse').innerHTML, /Doppelte Wesentlichkeit &amp; CSRD/);
+  assert.match(getElementById('essayCourse').innerHTML, /ROADS = Munition/);
+  assert.match(getElementById('essayCourse').innerHTML, /roads-omnibus-original-task\.webp/);
+  assert.match(getElementById('essayCourse').innerHTML, /roads-wesentlichkeit-original-task\.webp/);
 });
 
 test('prioritises the announced lecture blocks without active LkSG learning', () => {

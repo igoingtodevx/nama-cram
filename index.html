@@ -377,6 +377,9 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   border-left:3px solid var(--blue); padding:10px 11px; background:rgba(59,130,246,.07);
   border-radius:0 8px 8px 0; font-size:.78rem; line-height:1.5; margin-bottom:12px;
 }
+.essay-original-task { margin:-2px 0 12px; border-top:1px solid var(--border); padding-top:10px; }
+.essay-original-task summary { cursor:pointer; color:#d8d1ff; font-size:.78rem; font-weight:650; }
+.essay-original-task .crash-evidence { margin-bottom:8px; }
 .essay-memory {
   background:rgba(34,197,94,.07); border:1px solid rgba(34,197,94,.28); border-radius:10px;
   padding:10px 11px; color:#d9ffe4; font-size:.76rem; line-height:1.45; margin-bottom:12px;
@@ -393,8 +396,8 @@ header .stats { font-size:0.75rem; color:var(--muted); }
   content:counter(essay-point); color:var(--muted); font:700 .66rem/20px ui-monospace,SFMono-Regular,Consolas,monospace;
   text-align:center;
 }
-.basik-chip {
-  display:inline-block; width:20px; height:20px; border-radius:6px; text-align:center;
+.roads-chip {
+  display:inline-block; width:30px; height:20px; border-radius:6px; text-align:center;
   font:800 .65rem/20px ui-monospace,SFMono-Regular,Consolas,monospace;
   color:#f1efff; background:rgba(167,139,250,.18); border:1px solid rgba(167,139,250,.38);
 }
@@ -431,7 +434,7 @@ header .stats { font-size:0.75rem; color:var(--muted); }
 <nav class="mode-tabs" aria-label="Lernmodus">
   <button class="mode-tab active" id="studyTab" type="button" onclick="showMode('study')">🃏 Karten</button>
   <button class="mode-tab" id="crashTab" type="button" onclick="showMode('crash')">🚀 Crashkurs</button>
-  <button class="mode-tab" id="essayTab" type="button" onclick="showMode('essay')">✍️ Essay</button>
+  <button class="mode-tab" id="essayTab" type="button" onclick="showMode('essay')">🛣️ ROADS Essay</button>
 </nav>
 
 <div class="study-view" id="studyView">
@@ -514,6 +517,7 @@ const ESSAY_EXAMS = [
     id: 'ss25-pt1-omnibus',
     title: 'Omnibus & Deregulierung',
     exam: 'SoSe 2025 · 1. Prüfungstermin · Aufgabe 1 · 25 Punkte',
+    originalTasks: ['/crash-assets/roads-omnibus-original-task.webp'],
     memory: 'DATEN BLEIBEN → FREIRAUM NUTZEN → NICHT VERNACHLÄSSIGEN',
     prompt: 'Mittelständisches Unternehmen mit 500 Mitarbeitenden und 40 Mio. € Umsatz: Reflektieren Sie den Einfluss des Omnibuspakets auf (a) Datenerhebung und -steuerung, (b) Chancen und Risiken der ESG-Integration einschließlich CSDDD-Verschiebung auf 2028 und (c) Stärkung versus Vernachlässigung von CO₂-Berichterstattung und Lieferkettensorgfalt.',
     blocks: [
@@ -567,6 +571,7 @@ const ESSAY_EXAMS = [
     id: 'ss25-pt2-double-materiality',
     title: 'Doppelte Wesentlichkeit & CSRD',
     exam: 'SoSe 2025 · 2. Prüfungstermin · Aufgabe 1 · 25 Punkte',
+    originalTasks: ['/crash-assets/roads-wesentlichkeit-original-task.webp'],
     memory: 'ZWEI BLICKE → STEUERN → STRATEGIE + RISIKO + ORGANISATION',
     prompt: 'Schreiben Sie ein Essay zur Doppelten Wesentlichkeit im Kontext der CSRD: (a) Begriff und zentrale Bedeutung für die CSRD, (b) Implikationen für nachhaltiges Management und (c) Integration in Unternehmensstrategie, Risikomanagement und organisatorische Umsetzung.',
     blocks: [
@@ -795,13 +800,14 @@ function renderCrashCourse() {
 
 function renderEssayCourse() {
   const target = document.getElementById('essayCourse');
+  const roadsChip = { B: 'R', A: 'A', S: 'R', I: 'O/D', K: 'S' };
   const exams = ESSAY_EXAMS.map(exam => {
     const blocks = exam.blocks.map((block, blockIndex) => `
       <section class="essay-block">
         <h4>${escapeHtml(block.title)}</h4>
         <p class="essay-block-hint">${escapeHtml(block.hint)}</p>
         <ol class="essay-sentences" style="--start:${blockIndex * 8}">
-          ${block.sentences.map(([lens, sentence]) => `<li><span class="basik-chip" title="BASIK-Lernanker">${escapeHtml(lens)}</span><span>${escapeHtml(sentence)}</span></li>`).join('')}
+          ${block.sentences.map(([lens, sentence]) => `<li><span class="roads-chip" title="ROADS-Lernanker">${escapeHtml(roadsChip[lens] || lens)}</span><span>${escapeHtml(sentence)}</span></li>`).join('')}
         </ol>
       </section>`).join('');
     return `<details class="essay-exam" id="${escapeHtml(exam.id)}">
@@ -811,9 +817,10 @@ function renderEssayCourse() {
       </summary>
       <div class="essay-exam-body">
         <div class="essay-prompt"><strong>Originalauftrag, maximal kompakt:</strong><br>${escapeHtml(exam.prompt)}</div>
+        <details class="essay-original-task"><summary>📄 Originalaufgabe öffnen</summary>${exam.originalTasks.map(task => `<figure class="crash-evidence"><img src="${escapeHtml(task)}" loading="lazy" alt="Originalaufgabe: ${escapeHtml(exam.title)}"></figure>`).join('')}</details>
         <div class="essay-memory"><strong>3-Block-Merker:</strong> ${escapeHtml(exam.memory)}</div>
         ${blocks}
-        <div class="essay-verdict"><span class="point-number">25</span><span class="basik-chip">${escapeHtml(exam.verdict[0])}</span><span>${escapeHtml(exam.verdict[1])}</span></div>
+        <div class="essay-verdict"><span class="point-number">25</span><span class="roads-chip">${escapeHtml(roadsChip[exam.verdict[0]] || exam.verdict[0])}</span><span>${escapeHtml(exam.verdict[1])}</span></div>
         <p class="essay-source"><strong>Quellenstatus:</strong> ${escapeHtml(exam.source)}</p>
       </div>
     </details>`;
@@ -832,22 +839,23 @@ function renderEssayCourse() {
     </section>
 
     <div class="essay-plan" aria-label="20-Minuten-Lernplan">
-      <div><strong>0–4 Min.</strong>BASIK + 3×8+1 laut aufsagen.</div>
+      <div><strong>0–4 Min.</strong>ROADS + 3×8+1 laut aufsagen.</div>
       <div><strong>4–11 Min.</strong>Omnibus: drei Block-Merker lernen.</div>
       <div><strong>11–18 Min.</strong>Wesentlichkeit: drei Block-Merker lernen.</div>
       <div><strong>18–20 Min.</strong>Je acht Stichwörter ohne Hinsehen.</div>
     </div>
 
     <section class="basik-card">
-      <h3>BASIK = Notfall-Fragengenerator</h3>
-      <p>Nicht als fünf feste Absätze schreiben. Wenn dir in einem verlangten Block Informationen fehlen, frage BASIK durch:</p>
+      <h3>ROADS = Munition · BASIK = Notanker</h3>
+      <p><strong>ROADS ist dein Hauptsystem:</strong> Es liefert die punktfähigen Perspektiven. Unter jede Original-Überschrift sammelst du nur die passenden Sätze; nicht alle fünf Buchstaben zwanghaft in jeden Block drücken.</p>
       <div class="basik-grid">
-        <div class="basik-item"><b>B</b>Begriff: Was bedeutet es?</div>
-        <div class="basik-item"><b>A</b>Anwendung: Was heißt es im Fall?</div>
-        <div class="basik-item"><b>S</b>Strategie: Chance, Risiko, Geschäftsmodell?</div>
-        <div class="basik-item"><b>I</b>Implementierung: Wer, Prozess, Daten, KPI?</div>
-        <div class="basik-item"><b>K</b>Kritik/Konsequenz: Grenze und Urteil?</div>
+        <div class="basik-item"><b>R</b>Relevanz: Geschäftsmodell, Risiken/Chancen, Stakeholder</div>
+        <div class="basik-item"><b>O</b>Ownership: Vorstand, Fachbereiche, Aufsicht</div>
+        <div class="basik-item"><b>A</b>Actions: Wesentlichkeit, Ziele, Maßnahmen</div>
+        <div class="basik-item"><b>D</b>Data: KPI, Daten/IT, IKS, Reporting</div>
+        <div class="basik-item"><b>S</b>Stress-Test: Kosten, Datenlücken, Greenwashing, Urteil</div>
       </div>
+      <p><strong>BASIK nur bei Blackout:</strong> Begriff · Anwendung · Strategie · Implementierung · Kritik. Es ist kein eigener Absatzbauplan.</p>
     </section>
 
     <section class="essay-warning">

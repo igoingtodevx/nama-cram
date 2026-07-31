@@ -9,27 +9,29 @@ import fitz
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "knowledge" / "source-pdfs" / "Uebungen"
+SOURCE = ROOT / "knowledge" / "source-pdfs"
 TARGET = ROOT / "crash-assets"
 
 # output name -> (source pdf, one-indexed page numbers)
 ASSETS = {
-    "01-integrated-value-task.webp": ("SuSFi_Uebung1_Aufgaben.pdf", [9, 10]),
-    "01-integrated-value-solution.webp": ("SuSFi_Uebung1_Loesung.pdf", [18, 19]),
-    "02-taxonomie-kpis-task.webp": ("CorpSus_Uebung3_Aufgaben.pdf", [6, 7]),
-    "02-taxonomie-kpis-solution.webp": ("CorpSus_Uebung3_Loesung.pdf", [13, 14, 15]),
-    "03-wesentlichkeit-task.webp": ("CorpSus_Uebung2_Aufgaben.pdf", [2, 3, 4, 5]),
-    "03-wesentlichkeit-solution.webp": ("CorpSus_Ergaenzungen_Loesungen.pdf", [6, 7, 8, 9, 10]),
-    "04-essay-task.webp": ("CorpSus_Uebung1_Aufgaben.pdf", [7]),
-    "04-essay-solution.webp": ("CorpSus_Uebung1_Loesung.pdf", [10, 11]),
-    "05-wacc-capm-task.webp": ("SuSFi_Uebung1_Aufgaben.pdf", [8]),
-    "05-wacc-capm-solution.webp": ("SuSFi_Uebung1_Loesung.pdf", [13, 14, 15]),
-    "06-produktrechnung-task.webp": ("CorpSus_Uebung3_Aufgaben.pdf", [2, 3]),
-    "06-produktrechnung-solution.webp": ("CorpSus_Uebung3_Loesung.pdf", [4, 5]),
-    "07-kapitel4-theorie-task.webp": ("CorpSus_Uebung1_Aufgaben.pdf", [8, 9]),
-    "07-kapitel4-theorie-solution.webp": ("CorpSus_Uebung1_Loesung.pdf", [13, 14, 15, 16]),
-    "08-reserve-rechnen-task.webp": ("SuSFi_Uebung3_Aufgaben.pdf", [7, 8]),
-    "08-reserve-rechnen-solution.webp": ("SuSFi_Uebung3_Loesung.pdf", [15, 16, 17]),
+    "01-integrated-value-task.webp": ("Uebungen/SuSFi_Uebung1_Aufgaben.pdf", [9, 10]),
+    "01-integrated-value-solution.webp": ("Uebungen/SuSFi_Uebung1_Loesung.pdf", [18, 19]),
+    "02-taxonomie-kpis-task.webp": ("Uebungen/CorpSus_Uebung3_Aufgaben.pdf", [6, 7]),
+    "02-taxonomie-kpis-solution.webp": ("Uebungen/CorpSus_Uebung3_Loesung.pdf", [13, 14, 15]),
+    "03-wesentlichkeit-task.webp": ("Uebungen/CorpSus_Uebung2_Aufgaben.pdf", [2, 3, 4, 5]),
+    "03-wesentlichkeit-solution.webp": ("Uebungen/CorpSus_Ergaenzungen_Loesungen.pdf", [6, 7, 8, 9, 10]),
+    "04-essay-task.webp": ("Uebungen/CorpSus_Uebung1_Aufgaben.pdf", [7]),
+    "04-essay-solution.webp": ("Uebungen/CorpSus_Uebung1_Loesung.pdf", [10, 11]),
+    "05-wacc-capm-task.webp": ("Uebungen/SuSFi_Uebung1_Aufgaben.pdf", [8]),
+    "05-wacc-capm-solution.webp": ("Uebungen/SuSFi_Uebung1_Loesung.pdf", [13, 14, 15]),
+    "06-produktrechnung-task.webp": ("Uebungen/CorpSus_Uebung3_Aufgaben.pdf", [2, 3]),
+    "06-produktrechnung-solution.webp": ("Uebungen/CorpSus_Uebung3_Loesung.pdf", [4, 5]),
+    "07-kapitel4-theorie-task.webp": ("Uebungen/CorpSus_Uebung1_Aufgaben.pdf", [8, 9]),
+    "07-kapitel4-theorie-solution.webp": ("Uebungen/CorpSus_Uebung1_Loesung.pdf", [13, 14, 15, 16]),
+    "08-reserve-rechnen-task.webp": ("Uebungen/SuSFi_Uebung3_Aufgaben.pdf", [7, 8]),
+    "08-reserve-rechnen-solution.webp": ("Uebungen/SuSFi_Uebung3_Loesung.pdf", [15, 16, 17]),
+    "roads-omnibus-original-task.webp": ("Klausuren/SS25_PT1_Nachhaltigkeitsmanagement_Mies.pdf", [1, 2]),
+    "roads-wesentlichkeit-original-task.webp": ("Klausuren/SS25_PT2_Nachhaltigkeitsmanagement_Mies.pdf", [1]),
 }
 
 
